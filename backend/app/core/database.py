@@ -22,6 +22,10 @@ from app.models import (
     SearchLog,
     RecentlyViewed,
     OtpCode,
+    SpinLog,
+    ResellerProfile,
+    ResellerSharedCatalog,
+    ResellerOrderRecord,
 )
 
 motor_client: AsyncIOMotorClient = None
@@ -58,6 +62,10 @@ async def init_db():
         SearchLog,
         RecentlyViewed,
         OtpCode,
+        SpinLog,
+        ResellerProfile,
+        ResellerSharedCatalog,
+        ResellerOrderRecord,
     ]
 
     await init_beanie(database=db, document_models=document_models)

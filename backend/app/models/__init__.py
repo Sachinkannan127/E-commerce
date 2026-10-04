@@ -31,6 +31,14 @@ from app.models.payout import SellerPayout, PayoutStatus
 from app.models.audit import AuditLog, SearchLog, RecentlyViewed
 from app.models.otp import OtpCode
 
+from app.models.gamification import SpinLog, SpinRewardType
+from app.models.reseller import (
+    ResellerProfile,
+    ResellerSharedCatalog,
+    ResellerOrderRecord,
+    ResellerStatus,
+)
+
 __all__ = [
     "User",
     "UserRole",
@@ -74,4 +82,11 @@ __all__ = [
     "SearchLog",
     "RecentlyViewed",
     "OtpCode",
+    "SpinLog",
+    "SpinRewardType",
+    "ResellerProfile",
+    "ResellerSharedCatalog",
+    "ResellerOrderRecord",
+    "ResellerStatus",
 ]
+

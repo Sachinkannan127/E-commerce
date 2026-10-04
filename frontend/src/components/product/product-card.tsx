@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Star, ShoppingCart, Heart, Zap } from "lucide-react";
+import { Star, ShoppingCart, Heart, Zap, Scale } from "lucide-react";
 import { ProductSummary } from "@/types/product";
 import { formatPrice } from "@/lib/currency";
 import { useCartStore } from "@/store/cart-store";
+import { useCompareStore } from "@/store/useCompareStore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +19,8 @@ interface ProductCardProps {
 export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
+  const { addToCompare, removeFromCompare, isInCompare } = useCompareStore();
+  const isCompared = isInCompare(product.id);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -44,6 +47,25 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
     setIsWishlisted(!isWishlisted);
   };
 
+  const handleCompareToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isCompared) {
+      removeFromCompare(product.id);
+    } else {
+      addToCompare({
+        id: product.id,
+        title: product.title,
+        slug: product.slug,
+        primary_image: product.primary_image,
+        base_price_paise: product.base_price_paise,
+        brand_name: product.brand_name,
+        avg_rating: product.avg_rating,
+        category_slug: product.category_slug,
+      });
+    }
+  };
+
   if (viewMode === "list") {
     return (
       <Link href={`/products/${product.slug}`} className="block group">
@@ -63,14 +85,25 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                 {product.discount_pct}% OFF
               </Badge>
             )}
-            <button
-              onClick={handleWishlistToggle}
-              className={`absolute top-2 right-2 p-1.5 rounded-full bg-background/80 backdrop-blur shadow-sm transition-transform active:scale-90 ${
-                isWishlisted ? "text-rose-500" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Heart className={`h-4 w-4 ${isWishlisted ? "fill-rose-500" : ""}`} />
-            </button>
+            <div className="absolute top-2 right-2 flex flex-col gap-1">
+              <button
+                onClick={handleWishlistToggle}
+                className={`p-1.5 rounded-full bg-background/80 backdrop-blur shadow-sm transition-transform active:scale-90 ${
+                  isWishlisted ? "text-rose-500" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Heart className={`h-4 w-4 ${isWishlisted ? "fill-rose-500" : ""}`} />
+              </button>
+              <button
+                onClick={handleCompareToggle}
+                className={`p-1.5 rounded-full bg-background/80 backdrop-blur shadow-sm transition-transform active:scale-90 ${
+                  isCompared ? "text-primary bg-primary/20" : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Compare"
+              >
+                <Scale className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 flex flex-col justify-between space-y-3">
@@ -142,16 +175,27 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             )}
           </div>
 
-          {/* Wishlist Button */}
-          <button
-            onClick={handleWishlistToggle}
-            className={`absolute top-2 right-2 p-1.5 rounded-full bg-background/80 backdrop-blur shadow-sm transition-transform active:scale-90 ${
-              isWishlisted ? "text-rose-500" : "text-muted-foreground hover:text-foreground"
-            }`}
-            title="Add to Wishlist"
-          >
-            <Heart className={`h-4 w-4 ${isWishlisted ? "fill-rose-500" : ""}`} />
-          </button>
+          {/* Wishlist & Compare Buttons */}
+          <div className="absolute top-2 right-2 flex flex-col gap-1">
+            <button
+              onClick={handleWishlistToggle}
+              className={`p-1.5 rounded-full bg-background/80 backdrop-blur shadow-sm transition-transform active:scale-90 ${
+                isWishlisted ? "text-rose-500" : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Add to Wishlist"
+            >
+              <Heart className={`h-4 w-4 ${isWishlisted ? "fill-rose-500" : ""}`} />
+            </button>
+            <button
+              onClick={handleCompareToggle}
+              className={`p-1.5 rounded-full bg-background/80 backdrop-blur shadow-sm transition-transform active:scale-90 ${
+                isCompared ? "text-primary bg-primary/20 ring-1 ring-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Compare"
+            >
+              <Scale className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -203,3 +247,4 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
     </Link>
   );
 }
+

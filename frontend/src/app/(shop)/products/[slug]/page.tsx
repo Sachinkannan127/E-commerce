@@ -27,6 +27,7 @@ import { VariantSelector } from "@/components/product/variant-selector";
 import { PincodeChecker } from "@/components/product/pincode-checker";
 import { StickyBuyBar } from "@/components/product/sticky-buy-bar";
 import { ProductCard } from "@/components/product/product-card";
+import { FrequentlyBoughtTogether } from "@/components/product/FrequentlyBoughtTogether";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -279,6 +280,9 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Frequently Bought Together Bundle */}
+      <FrequentlyBoughtTogether productId={product.id} />
 
       {/* Specifications & Reviews Tabs */}
       <section className="space-y-6 pt-8 border-t">

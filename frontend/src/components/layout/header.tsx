@@ -46,16 +46,22 @@ export function Header() {
             <Zap className="h-3.5 w-3.5 fill-amber-300 text-amber-300" />
             Mega Festive Carnival: Flat 20% Instant Discount with Code <strong>FESTIVE20</strong>
           </span>
+          <Link href="/spin-and-win" className="inline-flex items-center gap-1 font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full hover:bg-amber-300 transition-colors">
+            🎁 Daily Spin & Win
+          </Link>
         </div>
         <div className="flex items-center gap-6">
           <Link href="/seller/onboarding" className="hover:underline">
             Become a Seller
           </Link>
-          <Link href="/reseller" className="hover:underline">
-            Earn with Reselling
+          <Link href="/reseller" className="hover:underline font-semibold text-amber-300">
+            Resell & Earn
+          </Link>
+          <Link href="/compare" className="hover:underline">
+            Compare
           </Link>
           <Link href="/help" className="hover:underline">
-            24x7 Customer Support
+            24x7 Support
           </Link>
         </div>
       </div>

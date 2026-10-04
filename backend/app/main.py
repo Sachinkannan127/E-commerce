@@ -24,6 +24,8 @@ from app.routers import (
     notifications,
     seller,
     admin,
+    gamification,
+    reseller,
 )
 
 
@@ -104,3 +106,6 @@ app.include_router(wishlist.router, prefix=settings.API_V1_STR)
 app.include_router(notifications.router, prefix=settings.API_V1_STR)
 app.include_router(seller.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
+app.include_router(gamification.router, prefix=settings.API_V1_STR)
+app.include_router(reseller.router, prefix=settings.API_V1_STR)
+
