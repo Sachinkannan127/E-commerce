@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: shopverse_mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: shopverse
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: shopverse_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shopverse_backend
+    restart: always
+    environment:
+      - ENVIRONMENT=development
+      - MONGODB_URI=mongodb://mongodb:27017/shopverse
+      - MONGODB_DB_NAME=shopverse
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - SECRET_KEY=shopverse-super-secret-production-grade-jwt-key-2026-antigravity
+    ports:
+      - "8000:8000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shopverse_celery_worker
+    command: celery -A app.celery_app.celery worker --loglevel=info
+    restart: always
+    environment:
+      - ENVIRONMENT=development
+      - MONGODB_URI=mongodb://mongodb:27017/shopverse
+      - MONGODB_DB_NAME=shopverse
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - SECRET_KEY=shopverse-super-secret-production-grade-jwt-key-2026-antigravity
+    depends_on:
+      - backend
+      - redis
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: shopverse_frontend
+    restart: always
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  mongo_data:
+  redis_data:
