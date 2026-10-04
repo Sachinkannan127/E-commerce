@@ -22,6 +22,7 @@ from app.routers import (
     reviews,
     wishlist,
     notifications,
+    seller,
 )
 
 
@@ -100,3 +101,4 @@ app.include_router(payments.router, prefix=settings.API_V1_STR)
 app.include_router(reviews.router, prefix=settings.API_V1_STR)
 app.include_router(wishlist.router, prefix=settings.API_V1_STR)
 app.include_router(notifications.router, prefix=settings.API_V1_STR)
+app.include_router(seller.router, prefix=settings.API_V1_STR)
