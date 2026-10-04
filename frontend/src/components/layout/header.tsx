@@ -16,6 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { SearchBar } from "./search-bar";
 import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
 import { Button } from "@/components/ui/button";
@@ -71,27 +72,10 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Search Bar with instant search and voice search */}
-        <form
-          onSubmit={handleSearchSubmit}
-          className="relative hidden md:flex flex-1 max-w-xl items-center"
-        >
-          <Search className="absolute left-3.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search 200+ electronics, mobiles, fashion, footwear..."
-            className="pl-9 pr-10 h-10 w-full rounded-full bg-muted/40 focus:bg-background transition-all"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button
-            type="button"
-            className="absolute right-3 text-muted-foreground hover:text-primary transition-colors"
-            title="Voice Search"
-          >
-            <Mic className="h-4 w-4" />
-          </button>
-        </form>
+        {/* Search Bar with instant autocomplete and voice search */}
+        <div className="hidden md:flex flex-1 max-w-xl">
+          <SearchBar />
+        </div>
 
         {/* Actions & Account */}
         <div className="flex items-center gap-2 sm:gap-3">
