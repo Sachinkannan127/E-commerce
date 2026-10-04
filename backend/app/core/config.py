@@ -1,7 +1,12 @@
 import os
 from typing import List, Union
+from dotenv import load_dotenv
 from pydantic import AnyHttpUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Force load .env from current and parent directory
+load_dotenv(override=True)
+load_dotenv("../.env", override=True)
 
 
 class Settings(BaseSettings):
@@ -52,7 +57,7 @@ class Settings(BaseSettings):
     DEFAULT_SHIPPING_FEE_PAISE: int = 4900     # ₹49
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "../.env"),
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
@@ -60,3 +65,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
