@@ -8,7 +8,21 @@ from app.core.database import init_db, close_db
 from app.core.redis import init_redis, close_redis
 from app.core.logging import setup_logging, logger
 from app.core.exceptions import ShopVerseException
-from app.routers import auth, users, categories, products, search, brands, cart, checkout, orders, payments
+from app.routers import (
+    auth,
+    users,
+    categories,
+    products,
+    search,
+    brands,
+    cart,
+    checkout,
+    orders,
+    payments,
+    reviews,
+    wishlist,
+    notifications,
+)
 
 
 @asynccontextmanager
@@ -83,3 +97,6 @@ app.include_router(cart.router, prefix=settings.API_V1_STR)
 app.include_router(checkout.router, prefix=settings.API_V1_STR)
 app.include_router(orders.router, prefix=settings.API_V1_STR)
 app.include_router(payments.router, prefix=settings.API_V1_STR)
+app.include_router(reviews.router, prefix=settings.API_V1_STR)
+app.include_router(wishlist.router, prefix=settings.API_V1_STR)
+app.include_router(notifications.router, prefix=settings.API_V1_STR)

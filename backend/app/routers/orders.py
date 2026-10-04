@@ -1,20 +1,28 @@
 from typing import List, Optional
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, Query, status
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Query, Response, status
+from fastapi.responses import Response as StreamResponse
+from pydantic import BaseModel, Field
 from beanie import PydanticObjectId
-from app.models.order import Order, OrderStatus, PaymentStatus, OrderTimelineStep
+from app.models.order import Order, OrderStatus, PaymentStatus, OrderTimelineStep, ReturnRequest
 from app.models.user import User
 from app.schemas.cart_and_order import OrderResponse
 from app.schemas.common import APIResponse, PaginatedResponse
 from app.middlewares.auth_guard import get_current_user
 from app.core.exceptions import NotFoundException, BadRequestException, ForbiddenException
+from app.utils.pdf_generator import generate_order_invoice_pdf
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
 
 class CancelOrderRequest(BaseModel):
     reason: str
+
+
+class CreateReturnRequest(BaseModel):
+    reason: str = Field(min_length=3, max_length=150)
+    comments: Optional[str] = None
+    photos: List[str] = Field(default_factory=list)
 
 
 @router.get("", response_model=APIResponse[PaginatedResponse[OrderResponse]])
@@ -142,4 +150,87 @@ async def cancel_order(
             timeline=[t.model_dump() for t in order.timeline],
             invoice_url=order.invoice_url,
         )
+    )
+
+
+@router.post("/{order_id}/return", response_model=APIResponse[OrderResponse])
+async def request_order_return(
+    order_id: str,
+    data: CreateReturnRequest,
+    current_user: User = Depends(get_current_user)
+):
+    order = await Order.get(PydanticObjectId(order_id))
+    if not order:
+        order = await Order.find_one(Order.order_number == order_id)
+
+    if not order:
+        raise NotFoundException("Order")
+
+    if order.user_id != current_user.id:
+        raise ForbiddenException("Cannot initiate return for this order")
+
+    if order.order_status != OrderStatus.DELIVERED:
+        raise BadRequestException("Only delivered orders are eligible for return / replacement")
+
+    order.order_status = OrderStatus.RETURN_REQUESTED
+    order.return_request = ReturnRequest(
+        reason=data.reason,
+        comments=data.comments,
+        photos=data.photos,
+        refund_amount_paise=order.total_amount_paise,
+        status="PENDING",
+    )
+    order.timeline.append(
+        OrderTimelineStep(
+            status=OrderStatus.RETURN_REQUESTED,
+            timestamp=datetime.now(timezone.utc),
+            title="Return Requested",
+            description=f"Reason: {data.reason}. Seller is reviewing the request.",
+            actor="CUSTOMER",
+        )
+    )
+    await order.save()
+
+    return APIResponse(
+        message="Return request submitted successfully",
+        data=OrderResponse(
+            id=str(order.id),
+            order_number=order.order_number,
+            order_status=order.order_status,
+            payment_status=order.payment_status,
+            payment_method=order.payment_method,
+            total_amount_paise=order.total_amount_paise,
+            items_count=len(order.items),
+            created_at=order.created_at.strftime("%d %b %Y, %I:%M %p"),
+            shipping_address=order.shipping_address,
+            items=[i.model_dump() for i in order.items],
+            timeline=[t.model_dump() for t in order.timeline],
+            invoice_url=order.invoice_url,
+        )
+    )
+
+
+@router.get("/{order_id}/invoice")
+async def download_invoice(
+    order_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    order = await Order.get(PydanticObjectId(order_id))
+    if not order:
+        order = await Order.find_one(Order.order_number == order_id)
+
+    if not order:
+        raise NotFoundException("Order")
+
+    if order.user_id != current_user.id and current_user.role != "ADMIN":
+        raise ForbiddenException("Access denied")
+
+    pdf_bytes = generate_order_invoice_pdf(order)
+
+    return StreamResponse(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=Invoice-{order.order_number}.pdf"
+        }
     )
