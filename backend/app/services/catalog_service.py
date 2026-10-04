@@ -151,6 +151,21 @@ class CatalogService:
             Product.is_published == True,
             Product.is_deleted == False
         )
+
+        # Fallback 1: match slug prefix if numeric suffix changed
+        if not product and "-" in slug:
+            prefix = slug.rsplit("-", 1)[0]
+            product = await Product.find_one(
+                {"slug": {"$regex": f"^{prefix}"}, "is_published": True, "is_deleted": False}
+            )
+
+        # Fallback 2: check by ID
+        if not product and len(slug) == 24:
+            try:
+                product = await Product.get(PydanticObjectId(slug))
+            except Exception:
+                pass
+
         if not product:
             raise NotFoundException("Product")
 
