@@ -1,9 +1,14 @@
 import asyncio
+import os
+import sys
 import random
 from datetime import datetime, timezone, timedelta
 from faker import Faker
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
+
+# Add parent directory to sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.core.config import settings
 from app.core.security import get_password_hash
