@@ -9,8 +9,14 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "ShopVerse - Multi-Vendor Online Shopping",
   description:
-    "Shop 200+ products across Electronics, Fashion, Mobiles, Home, and Beauty with lightning-fast delivery and verified sellers.",
+    "Shop 500+ products across Electronics, Fashion, Mobiles, Home, and Beauty with lightning-fast delivery, daily lucky spins, and verified sellers.",
   keywords: ["e-commerce", "shopping", "electronics", "fashion", "mobiles", "shopverse"],
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/icon-192x192.png",
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({

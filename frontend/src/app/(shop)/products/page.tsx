@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
@@ -22,7 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export default function ProductsListingPage() {
+function ProductsListingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -487,5 +487,24 @@ export default function ProductsListingPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function ProductsListingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container py-12 space-y-6">
+          <Skeleton className="h-10 w-48 rounded-xl" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-square rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <ProductsListingContent />
+    </Suspense>
   );
 }

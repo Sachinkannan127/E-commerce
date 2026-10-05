@@ -1,79 +1,129 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   Zap,
   ArrowRight,
   ShieldCheck,
-  ShoppingBag,
-  Share2,
-  TrendingUp,
-  Gift,
-  Truck,
-  RotateCcw,
-  Sparkles,
-  CheckCircle,
-  Star,
-  Layers,
-  Search,
-  Lock,
-  Smartphone,
-  Store,
-  ChevronRight,
   Flame,
-  Tag
+  Tag,
+  Clock,
+  Sparkles,
+  Award,
+  CreditCard,
+  Gift,
+  ExternalLink,
+  Percent,
+  CheckCircle2,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  ShoppingBag,
+  TrendingUp,
+  Store,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
-export const metadata = {
-  title: "ShopVerse - The Next-Gen Multi-Vendor Commerce Platform",
-  description: "Experience India's premier multi-vendor e-commerce platform. Shop 500+ top brands, resell with zero investment, and scale your business.",
-};
-
-const STATS = [
-  { value: "500+", label: "Curated Products", change: "Across 10 Categories" },
-  { value: "100+", label: "Verified Sellers", change: "Direct from Hubs" },
-  { value: "₹0", label: "Reseller Investment", change: "Start in 60 seconds" },
-  { value: "24-48h", label: "Express Delivery", change: "Pan-India Reach" },
+const HERO_ADS = [
+  {
+    id: 1,
+    tag: "Sponsored Mega Carnival",
+    pill: "Flat 20% Code: FESTIVE20",
+    title: "Apple & Samsung Flagship Mega Fest",
+    highlight: "Up to ₹15,000 Instant Bank Off",
+    desc: "iPhone 15 Pro Max & Galaxy S24 Ultra with No Cost EMI from ₹2,499/mo + Free 1-Year Apple Care+ / Galaxy Buds 2 Pro.",
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80",
+    categorySlug: "mobiles",
+    cta: "Shop Flagships Now",
+    gradient: "from-indigo-950 via-purple-900 to-indigo-900",
+  },
+  {
+    id: 2,
+    tag: "Ajio Style Week",
+    pill: "Min 50% - 80% Off",
+    title: "Curated Luxury & Streetwear Drops",
+    highlight: "Tommy Hilfiger, Zara & Nike",
+    desc: "Redefine your wardrobe with runway apparel, limited-edition couture, and verified original sneakers.",
+    image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80",
+    categorySlug: "fashion",
+    cta: "Explore Runway Drops",
+    gradient: "from-purple-950 via-fuchsia-900 to-slate-950",
+  },
+  {
+    id: 3,
+    tag: "Smart Living Ad",
+    pill: "Flat ₹5,000 Instant Off",
+    title: "Dyson & Smart Home Revolution",
+    highlight: "Cordless V12 & Air Purifiers",
+    desc: "Experience acoustic suction power, HEPA air purification, and smart kitchen cookware at festive pricing.",
+    image: "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=800&q=80",
+    categorySlug: "home-kitchen",
+    cta: "Claim Dyson Deals",
+    gradient: "from-zinc-950 via-teal-950 to-slate-900",
+  },
+  {
+    id: 4,
+    tag: "Audio Bonanza",
+    pill: "Starting ₹799",
+    title: "Sony & boAt Spatial Sound Fest",
+    highlight: "Noise Cancellation Earbuds & Bars",
+    desc: "Cinematic Dolby Atmos bass and 60-hour playtime bluetooth earbuds with free extended warranty.",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80",
+    categorySlug: "electronics",
+    cta: "Grab Audio Deals",
+    gradient: "from-slate-950 via-rose-950 to-black",
+  },
 ];
 
-const PILLARS = [
+const LIGHTNING_BLITZ_DEALS = [
   {
-    icon: ShoppingBag,
-    title: "Mega Marketplace",
-    badge: "Amazon & Flipkart Level",
-    badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-    desc: "Lightning-fast catalog search, multi-variant options, verified ratings, 1-click checkout, and instant festive promo codes.",
-    link: "/home",
-    cta: "Enter Marketplace",
+    title: "Dyson V12 Detect Slim Total Clean Cordless Vacuum",
+    price: "₹44,990",
+    originalPrice: "₹57,900",
+    discount: "22% OFF",
+    claimedPct: 88,
+    unitsLeft: 3,
+    viewers: 34,
+    image: "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=400&q=80",
+    categorySlug: "home-kitchen",
   },
   {
-    icon: Share2,
-    title: "Zero-Investment Reselling",
-    badge: "Meesho Model",
-    badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-    desc: "Add your custom profit margin, share directly on WhatsApp & Instagram, and let verified suppliers fulfill the orders automatically.",
-    link: "/reseller",
-    cta: "Start Reselling",
+    title: "Sony WH-1000XM5 Wireless Active Noise Cancelling",
+    price: "₹24,990",
+    originalPrice: "₹34,990",
+    discount: "29% OFF",
+    claimedPct: 76,
+    unitsLeft: 5,
+    viewers: 21,
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
+    categorySlug: "electronics",
   },
   {
-    icon: TrendingUp,
-    title: "Curated Fashion & Trends",
-    badge: "Ajio Style Curations",
-    badgeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
-    desc: "Handpicked premium streetwear, ethnic couture, footwear drops, and luxury electronics with rich lookbooks and high-res media.",
-    link: "/products?category_slug=fashion",
-    cta: "Explore Fashion",
+    title: "Nike Air Max Pulse Men's Athletic Running Shoes",
+    price: "₹4,999",
+    originalPrice: "₹10,995",
+    discount: "55% OFF",
+    claimedPct: 94,
+    unitsLeft: 2,
+    viewers: 49,
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
+    categorySlug: "footwear",
   },
   {
-    icon: Gift,
-    title: "Daily Spin & Win Rewards",
-    badge: "Gamified Loyalty",
-    badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-    desc: "Spin the fortune wheel every 24 hours for instant flat 50% discount coupons, wallet cash, and free shipping vouchers.",
-    link: "/spin-and-win",
-    cta: "Spin the Wheel",
+    title: "Samsung Galaxy S24 Ultra AI 5G (Titanium Gray, 256GB)",
+    price: "₹1,19,999",
+    originalPrice: "₹1,34,999",
+    discount: "11% OFF",
+    claimedPct: 65,
+    unitsLeft: 8,
+    viewers: 62,
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80",
+    categorySlug: "mobiles",
   },
 ];
 
@@ -86,186 +136,211 @@ const POPULAR_CATEGORIES = [
   { name: "Beauty & Personal", slug: "beauty", image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80", count: "70+ Brands" },
 ];
 
-const TESTIMONIALS = [
-  {
-    name: "Priya Sharma",
-    role: "Fashion Reseller, Delhi",
-    text: "ShopVerse changed my home business. I added ₹250 margin per saree and earned ₹38,000 in my first month without holding any stock!",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&q=80",
-  },
-  {
-    name: "Rahul Verma",
-    role: "Verified Electronics Seller",
-    text: "The seller analytics dashboard and automated commission settlement make scaling seamless. Best e-commerce hub in India.",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=80",
-  },
-  {
-    name: "Ananya Iyer",
-    role: "Verified Customer, Bangalore",
-    text: "Ordered a Dyson vacuum and Nike sneakers. Both arrived in pristine packaging in under 36 hours. The 1-click checkout is amazing.",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&q=80",
-  },
+const UNDER_999_DEALS = [
+  { title: "boAt BassHeads 100 Wired Earphones", price: "₹399", old: "₹999", off: "60% OFF", img: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=300&q=80" },
+  { title: "Fastrack Limitless FS1 Smartwatch", price: "₹999", old: "₹2,495", off: "60% OFF", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&q=80" },
+  { title: "Cotton Rich Oversized Graphic Tee", price: "₹499", old: "₹1,299", off: "62% OFF", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300&q=80" },
+  { title: "Stainless Steel Insulated Water Flask", price: "₹449", old: "₹999", off: "55% OFF", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300&q=80" },
 ];
 
-export default function LandingPage() {
+const SPONSORED_BRANDS = [
+  { name: "Apple", logo: "🍎", tag: "Authorised Reseller", discount: "Up to ₹10,000 Off", slug: "mobiles" },
+  { name: "Samsung", logo: "📱", tag: "Galaxy Festival", discount: "Flat 25% Cashback", slug: "mobiles" },
+  { name: "Nike", logo: "👟", tag: "Official Sports Hub", discount: "Min 40% Off", slug: "footwear" },
+  { name: "Puma", logo: "🐆", tag: "Motorsport Collection", discount: "Buy 1 Get 1 at 50%", slug: "footwear" },
+  { name: "Dyson", logo: "🌀", tag: "Smart Living Partner", discount: "Flat ₹5,000 Off", slug: "home-kitchen" },
+  { name: "boAt", logo: "🎧", tag: "Audio King", discount: "Starting ₹899", slug: "electronics" },
+];
+
+const BANK_OFFERS = [
+  { bank: "HDFC Bank", offer: "10% Instant Discount", sub: "Up to ₹1,500 on Cards & EMI", color: "from-blue-600 to-indigo-700" },
+  { bank: "ICICI Bank", offer: "Flat ₹2,000 Cashback", sub: "On Mobiles & Laptops", color: "from-amber-600 to-orange-700" },
+  { bank: "SBI Card", offer: "5% Unlimited Cashback", sub: "On all Fashion & Home", color: "from-sky-600 to-blue-800" },
+  { bank: "UPI / Google Pay", offer: "Assured ₹100 - ₹500", sub: "On orders above ₹999", color: "from-emerald-600 to-teal-700" },
+];
+
+export default function StoreHomePage() {
+  const [activeAdIndex, setActiveAdIndex] = useState(0);
+
+  // Auto rotate hero ads every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveAdIndex((prev) => (prev + 1) % HERO_ADS.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentAd = HERO_ADS[activeAdIndex];
+
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground overflow-hidden">
-      {/* Glow Ambient Blobs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[650px] overflow-hidden pointer-events-none -z-10">
-        <div className="absolute -top-32 left-1/4 w-96 h-96 bg-primary/25 rounded-full blur-3xl" />
-        <div className="absolute top-20 right-1/4 w-96 h-96 bg-purple-500/25 rounded-full blur-3xl" />
-        <div className="absolute top-48 left-1/2 -translate-x-1/2 w-[600px] h-72 bg-amber-500/15 rounded-full blur-3xl" />
-      </div>
-
-      {/* Hero Section */}
-      <section className="container pt-10 pb-16 md:pt-16 md:pb-24 text-center space-y-8 max-w-5xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border bg-background/80 backdrop-blur-md shadow-sm text-xs font-semibold animate-pulse">
-          <Sparkles className="h-4 w-4 text-amber-500" />
-          <span>India&apos;s Ultimate Multi-Vendor Super App</span>
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span className="text-emerald-600 dark:text-emerald-400 font-bold">500+ Items Live</span>
-        </div>
-
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.1]">
-          Shop Smart. Resell & Earn. <br className="hidden sm:inline" />
-          <span className="bg-gradient-to-r from-primary via-purple-500 to-amber-500 bg-clip-text text-transparent">
-            Sell to Millions.
-          </span>
-        </h1>
-
-        <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          The all-in-one commerce ecosystem combining the speed of <strong>Amazon</strong>, 
-          the resale power of <strong>Meesho</strong>, and the curated trends of <strong>Ajio</strong>.
-        </p>
-
-        {/* Primary Call to Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Link href="/home" className="w-full sm:w-auto">
-            <Button
-              size="lg"
-              className="w-full sm:w-auto text-base font-black px-8 py-6 rounded-2xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 text-white shadow-xl shadow-primary/25 gap-2 group transition-all hover:scale-105"
-            >
-              Enter Store & Explore Marketplace
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
-
-          <Link href="/reseller" className="w-full sm:w-auto">
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-full sm:w-auto text-base font-bold px-8 py-6 rounded-2xl border-2 hover:bg-muted/50 gap-2"
-            >
-              <Share2 className="h-5 w-5 text-emerald-500" />
-              Start Reselling (₹0 Inv.)
-            </Button>
-          </Link>
-
-          <Link href="/seller/onboarding" className="w-full sm:w-auto">
-            <Button
-              size="lg"
-              variant="ghost"
-              className="w-full sm:w-auto text-base font-bold px-6 py-6 rounded-2xl hover:bg-muted/30 gap-2"
-            >
-              <Store className="h-5 w-5 text-primary" />
-              Become a Seller
-            </Button>
-          </Link>
-        </div>
-
-        {/* Floating Live Feature Badges */}
-        <div className="pt-6 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground font-medium">
-          <span className="flex items-center gap-1.5">
-            <CheckCircle className="h-4 w-4 text-emerald-500" /> 100% Verified Sellers
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Truck className="h-4 w-4 text-blue-500" /> Express 24-48h Delivery
-          </span>
-          <span className="flex items-center gap-1.5">
-            <RotateCcw className="h-4 w-4 text-amber-500" /> 7-Day Easy Returns
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Lock className="h-4 w-4 text-purple-500" /> Encrypted UPI / Card Checkout
-          </span>
-        </div>
-      </section>
-
-      {/* Stats Counter Bar */}
-      <section className="container pb-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-8 rounded-3xl border bg-card/60 backdrop-blur-xl shadow-lg">
-          {STATS.map((stat, i) => (
-            <div key={i} className="text-center space-y-1 p-3">
-              <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
-                {stat.value}
+    <div className="space-y-10 pb-20">
+      {/* 1. INTERACTIVE ROTATING HERO AD CAROUSEL */}
+      <section className="container pt-4">
+        <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-r ${currentAd.gradient} text-white shadow-2xl p-6 sm:p-10 md:p-12 transition-all duration-700`}>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 min-h-[360px]">
+            <div className="relative z-10 max-w-xl space-y-4 text-center md:text-left">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                <Badge variant="deal" className="animate-bounce">
+                  {currentAd.tag}
+                </Badge>
+                <Badge className="bg-amber-400 text-slate-950 font-bold">
+                  {currentAd.pill}
+                </Badge>
               </div>
-              <div className="text-xs sm:text-sm font-bold text-foreground">{stat.label}</div>
-              <div className="text-[11px] text-muted-foreground">{stat.change}</div>
+
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+                {currentAd.title}
+              </h1>
+
+              <p className="text-sm font-bold text-amber-300">
+                {currentAd.highlight}
+              </p>
+
+              <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
+                {currentAd.desc}
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
+                <Link href={`/products?category_slug=${currentAd.categorySlug}`}>
+                  <Button size="lg" className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold rounded-full gap-2 shadow-lg">
+                    {currentAd.cta} <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/spin-and-win">
+                  <Button size="lg" variant="outline" className="border-amber-300 text-amber-300 hover:bg-amber-400/10 rounded-full font-bold">
+                    🎁 Daily Spin & Win
+                  </Button>
+                </Link>
+              </div>
             </div>
-          ))}
+
+            {/* Visual Hero Ad Graphic */}
+            <div className="relative w-full max-w-xs sm:max-w-sm aspect-square rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 flex-shrink-0">
+              <Image
+                src={currentAd.image}
+                alt={currentAd.title}
+                fill
+                className="object-cover transition-all duration-500 hover:scale-105"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4 text-white">
+                <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">Ad • Verified Partner</span>
+                <p className="text-xs font-semibold">{currentAd.highlight}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Ad Carousel Controls */}
+          <div className="flex items-center justify-center gap-2 pt-6">
+            {HERO_ADS.map((ad, idx) => (
+              <button
+                key={ad.id}
+                onClick={() => setActiveAdIndex(idx)}
+                className={`h-2.5 rounded-full transition-all ${
+                  activeAdIndex === idx ? "w-8 bg-amber-400" : "w-2.5 bg-white/40 hover:bg-white/70"
+                }`}
+                aria-label={`Slide ${idx + 1}`}
+              />
+            ))}
+          </div>
+
+          {/* Glowing Ambient Blobs */}
+          <div className="absolute -right-16 -top-16 h-80 w-80 rounded-full bg-purple-500/25 blur-3xl pointer-events-none" />
+          <div className="absolute left-12 -bottom-12 h-64 w-64 rounded-full bg-indigo-500/30 blur-2xl pointer-events-none" />
         </div>
       </section>
 
-      {/* The 4 Ecosystem Pillars */}
-      <section className="container space-y-10 pb-20">
-        <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <Badge variant="outline" className="text-xs uppercase tracking-wider">
-            Built for Everyone
-          </Badge>
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
-            One Platform. Infinite Possibilities.
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Whether you want to shop top products, build a passive resale income, or scale your brand nationally.
-          </p>
-        </div>
+      {/* 2. REAL-TIME LIGHTNING BLITZ DEALS WITH STOCK PROGRESS BAR */}
+      <section className="container">
+        <div className="rounded-3xl border-2 border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-amber-500/5 to-purple-500/10 p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-rose-500 text-white shadow-lg animate-pulse">
+                <Flame className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-black tracking-tight text-foreground">Real-Time Lightning Blitz Deals</h2>
+                  <Badge className="bg-rose-500 text-white text-[10px] font-bold animate-pulse">
+                    Live Stock Decrement
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">High-demand deals expiring in real-time. Lock your cart before stock runs out!</p>
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {PILLARS.map((p, idx) => {
-            const Icon = p.icon;
-            return (
-              <Card
-                key={idx}
-                className="group p-8 rounded-3xl border-2 hover:border-primary/40 transition-all hover:shadow-xl bg-card/50 backdrop-blur-sm flex flex-col justify-between space-y-6"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Icon className="h-7 w-7" />
+            <div className="flex items-center gap-2 text-sm font-semibold bg-background/90 backdrop-blur px-4 py-2 rounded-2xl border shadow-xs">
+              <Clock className="h-4 w-4 text-rose-500 animate-spin" />
+              <span>Deal Ends In:</span>
+              <span className="text-rose-600 dark:text-rose-400 font-mono font-bold">02h : 14m : 55s</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {LIGHTNING_BLITZ_DEALS.map((deal, idx) => (
+              <Card key={idx} className="overflow-hidden rounded-2xl p-3.5 space-y-3 hover:shadow-xl transition-all border-2 hover:border-rose-500/50 flex flex-col justify-between">
+                <div className="space-y-2.5">
+                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
+                    <Image
+                      src={deal.image}
+                      alt={deal.title}
+                      fill
+                      className="object-cover"
+                    />
+                    <Badge variant="deal" className="absolute top-2 left-2 text-[10px] font-black">
+                      {deal.discount}
+                    </Badge>
+                    <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Users className="h-3 w-3 text-amber-300" /> {deal.viewers} viewing now
                     </div>
-                    <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${p.badgeColor}`}>
-                      {p.badge}
-                    </span>
                   </div>
 
-                  <h3 className="text-2xl font-bold">{p.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold text-xs line-clamp-2">{deal.title}</h4>
+                    <div className="flex items-baseline gap-2 pt-1">
+                      <span className="text-base font-black text-foreground">{deal.price}</span>
+                      <span className="text-xs text-muted-foreground line-through">{deal.originalPrice}</span>
+                    </div>
+                  </div>
+
+                  {/* Stock Claim Progress Bar */}
+                  <div className="space-y-1 pt-1">
+                    <div className="flex justify-between text-[11px] font-bold">
+                      <span className="text-rose-600 dark:text-rose-400">{deal.claimedPct}% Claimed</span>
+                      <span className="text-amber-600 dark:text-amber-400">Only {deal.unitsLeft} Left!</span>
+                    </div>
+                    <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-500 to-rose-600 rounded-full transition-all"
+                        style={{ width: `${deal.claimedPct}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <Link href={p.link}>
-                    <Button variant="outline" className="rounded-xl gap-2 font-bold group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      {p.cta} <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
+                <Link href={`/products?category_slug=${deal.categorySlug}`} className="pt-2">
+                  <Button size="sm" className="w-full rounded-xl font-bold bg-rose-500 hover:bg-rose-600 text-white shadow-md">
+                    Claim Deal Now
+                  </Button>
+                </Link>
               </Card>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Category Spotlight Grid */}
-      <section className="container space-y-6 pb-20">
+      {/* 3. CATEGORY SPOTLIGHT GRID */}
+      <section className="container space-y-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Popular Marketplace Hubs</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Explore 500+ products curated across key categories</p>
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="h-5 w-5 text-primary" />
+            <div>
+              <h2 className="text-xl font-bold tracking-tight">Shop by Category Hubs</h2>
+              <p className="text-xs text-muted-foreground">Explore 500+ curated products across 10 top categories</p>
+            </div>
           </div>
-          <Link href="/home" className="text-sm font-semibold text-primary hover:underline flex items-center gap-1">
-            Enter Store <ArrowRight className="h-4 w-4" />
+          <Link href="/products" className="text-xs sm:text-sm font-semibold text-primary hover:underline flex items-center gap-1">
+            Browse All Catalog <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
@@ -292,166 +367,182 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Interactive Reseller Showcase Section */}
-      <section className="container pb-20">
-        <div className="rounded-3xl bg-gradient-to-br from-emerald-950/40 via-background to-teal-950/30 border-2 border-emerald-500/20 p-8 sm:p-14 md:p-16 flex flex-col lg:flex-row items-center justify-between gap-10">
-          <div className="space-y-6 max-w-xl">
-            <Badge className="bg-emerald-500 text-white font-bold text-xs px-3 py-1">
-              Meesho-Style Reseller Hub
-            </Badge>
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-              Start Your Own Online Business with <span className="text-emerald-400">Zero Investment</span>
-            </h2>
-            <div className="space-y-3 text-sm text-muted-foreground">
-              <div className="flex items-start gap-3">
-                <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold mt-0.5">
-                  1
-                </div>
-                <div>
-                  <strong className="text-foreground">Browse 500+ Wholesale Catalogs</strong>
-                  <p className="text-xs">Pick trending sarees, kurtis, smartwatches, or home essentials.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold mt-0.5">
-                  2
-                </div>
-                <div>
-                  <strong className="text-foreground">Set Your Custom Profit Margin</strong>
-                  <p className="text-xs">Example: Wholesale ₹499 → Add ₹300 Margin → Customer pays ₹799.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold mt-0.5">
-                  3
-                </div>
-                <div>
-                  <strong className="text-foreground">Share on WhatsApp & Pocket Profits</strong>
-                  <p className="text-xs">We ship directly in your brand name; profit gets deposited to your bank.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <Link href="/reseller">
-                <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black rounded-2xl px-8 shadow-lg shadow-emerald-500/20 gap-2">
-                  Launch Reseller Business <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
+      {/* 4. BANK & PAYMENT CASHBACK OFFERS AD STRIP */}
+      <section className="container">
+        <div className="flex items-center justify-between pb-3">
+          <div className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-primary" />
+            <h3 className="text-sm font-bold text-foreground">Partner Bank & Payment Promotions</h3>
           </div>
-
-          {/* Visual Reseller Mock Card */}
-          <Card className="w-full max-w-md p-6 rounded-3xl border-2 border-emerald-500/30 bg-card/90 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b">
-              <span className="text-xs font-bold text-muted-foreground">Reseller Order Simulator</span>
-              <Badge variant="secondary" className="text-[10px] text-emerald-500 bg-emerald-500/10">
-                Live Preview
-              </Badge>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="h-16 w-16 rounded-xl bg-muted overflow-hidden relative flex-shrink-0">
-                <Image
-                  src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80"
-                  alt="Smart Watch"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div>
-                <h4 className="font-bold text-sm">Ultra Smart Watch Pro Max</h4>
-                <p className="text-xs text-muted-foreground">Supplier Base Price: ₹1,299</p>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-muted/40 space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Your Added Margin</span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">+₹500.00</span>
-              </div>
-              <div className="flex justify-between font-black text-sm pt-2 border-t text-foreground">
-                <span>Final Customer Bill</span>
-                <span>₹1,799.00</span>
-              </div>
-            </div>
-
-            <div className="text-center text-[11px] text-muted-foreground">
-              💰 Direct Payout to your bank upon delivery
-            </div>
-          </Card>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="container space-y-8 pb-20">
-        <div className="text-center space-y-2">
-          <Badge variant="outline" className="text-xs uppercase">
-            Community Love
-          </Badge>
-          <h2 className="text-3xl font-black">Trusted by Shoppers, Sellers & Resellers</h2>
+          <span className="text-[11px] text-muted-foreground">Instant Discount Applied at Checkout</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t, idx) => (
-            <Card key={idx} className="p-6 rounded-3xl border bg-card/40 backdrop-blur-sm space-y-4">
-              <div className="flex items-center gap-1 text-amber-400">
-                {Array.from({ length: t.rating }).map((_, r) => (
-                  <Star key={r} className="h-4 w-4 fill-amber-400" />
-                ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {BANK_OFFERS.map((b, idx) => (
+            <Card
+              key={idx}
+              className={`p-4 rounded-2xl bg-gradient-to-br ${b.color} text-white shadow-md flex items-center justify-between gap-3 border-0 hover:scale-102 transition-transform`}
+            >
+              <div className="space-y-0.5">
+                <span className="text-[11px] font-black uppercase tracking-wider text-white/80">{b.bank}</span>
+                <h4 className="text-sm font-bold">{b.offer}</h4>
+                <p className="text-[11px] text-white/90">{b.sub}</p>
               </div>
-              <p className="text-sm text-muted-foreground italic leading-relaxed">
-                &ldquo;{t.text}&rdquo;
-              </p>
-              <div className="flex items-center gap-3 pt-2">
-                <div className="h-10 w-10 rounded-full overflow-hidden relative">
-                  <Image src={t.avatar} alt={t.name} fill className="object-cover" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-xs text-foreground">{t.name}</h4>
-                  <span className="text-[11px] text-muted-foreground">{t.role}</span>
-                </div>
-              </div>
+              <Percent className="h-7 w-7 text-white/40 flex-shrink-0" />
             </Card>
           ))}
         </div>
       </section>
 
-      {/* Grand Bottom CTA */}
-      <section className="container pb-20">
-        <div className="rounded-3xl bg-gradient-to-r from-indigo-900 via-purple-900 to-indigo-950 p-10 sm:p-16 text-center text-white space-y-6 shadow-2xl relative overflow-hidden">
-          <div className="relative z-10 max-w-2xl mx-auto space-y-4">
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
-              Ready to Experience India&apos;s Next-Gen Marketplace?
-            </h2>
-            <p className="text-sm sm:text-base text-indigo-200">
-              Join thousands of shoppers and resellers enjoying massive discounts, instant loyalty rewards, and 24-48h delivery.
-            </p>
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/home">
-                <Button
-                  size="lg"
-                  className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-base px-10 py-6 rounded-2xl shadow-xl shadow-amber-500/20 gap-2"
-                >
-                  Enter Homepage & Shop Now <ArrowRight className="h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/seller/onboarding">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10 rounded-2xl px-8 py-6 font-bold"
-                >
-                  Register as Seller
-                </Button>
-              </Link>
+      {/* 5. DUAL SPONSORED ADS (Audio + Sneaker Drop) */}
+      <section className="container">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Ad 1: Audio */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-zinc-900 to-black text-white p-6 sm:p-8 flex flex-col justify-between min-h-[260px] shadow-xl border border-zinc-800">
+            <div className="relative z-10 space-y-3 max-w-sm">
+              <Badge className="bg-rose-500 text-white text-[10px] uppercase font-bold">
+                Sponsored • Audio Fest
+              </Badge>
+              <h3 className="text-2xl font-black">Sony & boAt Spatial Audio</h3>
+              <p className="text-xs text-zinc-300 leading-relaxed">
+                Active Noise Cancellation earbuds and Dolby Atmos soundbars with up to 60% instant savings.
+              </p>
+              <div>
+                <Link href="/products?category_slug=electronics">
+                  <Button size="sm" className="rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold gap-1.5 shadow-md">
+                    Explore Audio Deals <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="absolute right-0 bottom-0 top-0 w-1/2 opacity-60 md:opacity-90 pointer-events-none">
+              <Image
+                src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80"
+                alt="Headphones Ad"
+                fill
+                className="object-cover"
+              />
             </div>
           </div>
 
-          <div className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-purple-500/20 blur-3xl pointer-events-none" />
-          <div className="absolute -left-20 -top-20 w-80 h-80 rounded-full bg-indigo-500/30 blur-3xl pointer-events-none" />
+          {/* Ad 2: Sneakers */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950 text-white p-6 sm:p-8 flex flex-col justify-between min-h-[260px] shadow-xl border border-indigo-900/50">
+            <div className="relative z-10 space-y-3 max-w-sm">
+              <Badge className="bg-amber-400 text-slate-950 text-[10px] uppercase font-black">
+                Sponsored • Sneaker Hub
+              </Badge>
+              <h3 className="text-2xl font-black">Nike & Puma Air Drops</h3>
+              <p className="text-xs text-indigo-200 leading-relaxed">
+                Limited edition running kicks, high-top street trainers, and gym wear at flat 45% off.
+              </p>
+              <div>
+                <Link href="/products?category_slug=footwear">
+                  <Button size="sm" className="rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold gap-1.5 shadow-md">
+                    Claim Sneaker Drop <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="absolute right-0 bottom-0 top-0 w-1/2 opacity-60 md:opacity-90 pointer-events-none">
+              <Image
+                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80"
+                alt="Sneakers Ad"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. BUDGET SUPER-SAVERS (UNDER ₹499 & ₹999) */}
+      <section className="container space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Tag className="h-5 w-5 text-emerald-500" />
+            <div>
+              <h2 className="text-xl font-bold tracking-tight">Budget Super Savers • Under ₹499 & ₹999</h2>
+              <p className="text-xs text-muted-foreground">High-demand everyday essentials with free delivery</p>
+            </div>
+          </div>
+          <Link href="/products" className="text-xs sm:text-sm font-semibold text-primary hover:underline flex items-center gap-1">
+            View All Savers <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {UNDER_999_DEALS.map((deal, idx) => (
+            <Card key={idx} className="p-3 rounded-2xl space-y-2 hover:shadow-md transition-all group border">
+              <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
+                <Image src={deal.img} alt={deal.title} fill className="object-cover group-hover:scale-105 transition-transform" />
+                <Badge variant="deal" className="absolute top-2 left-2 text-[10px]">
+                  {deal.off}
+                </Badge>
+              </div>
+              <h4 className="font-semibold text-xs line-clamp-1">{deal.title}</h4>
+              <div className="flex items-baseline gap-2">
+                <span className="text-sm font-black text-foreground">{deal.price}</span>
+                <span className="text-[11px] text-muted-foreground line-through">{deal.old}</span>
+              </div>
+              <Link href="/products">
+                <Button size="sm" variant="outline" className="w-full rounded-xl text-xs font-bold mt-1">
+                  Buy Under ₹999
+                </Button>
+              </Link>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* 7. OFFICIAL SPONSORED BRAND STORES RIBBON */}
+      <section className="container space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Award className="h-5 w-5 text-amber-500" />
+            <h2 className="text-xl font-bold tracking-tight">Official Sponsored Brand Stores</h2>
+          </div>
+          <span className="text-xs text-muted-foreground">100% Genuine Certified Brands</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {SPONSORED_BRANDS.map((brand, idx) => (
+            <Link key={idx} href={`/products?category_slug=${brand.slug}`}>
+              <Card className="p-4 rounded-2xl text-center space-y-2 hover:shadow-md transition-all hover:border-primary/50 group bg-card/60">
+                <div className="text-3xl">{brand.logo}</div>
+                <h3 className="font-bold text-sm text-foreground">{brand.name}</h3>
+                <p className="text-[11px] text-muted-foreground">{brand.tag}</p>
+                <Badge variant="secondary" className="text-[10px] text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  {brand.discount}
+                </Badge>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* 8. MEESHO-STYLE RESELLER EARNINGS PROMO BANNER */}
+      <section className="container">
+        <div className="rounded-3xl bg-gradient-to-r from-emerald-950 via-teal-900 to-emerald-900 text-white p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl border border-emerald-700/30">
+          <div className="space-y-3 max-w-xl text-center md:text-left">
+            <Badge className="bg-emerald-400 text-slate-950 font-bold text-xs">
+              Ad • Reseller Opportunity
+            </Badge>
+            <h3 className="text-2xl sm:text-3xl font-black">
+              Earn ₹25,000+ / Month by Sharing Products on WhatsApp
+            </h3>
+            <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
+              Zero stock investment required. Add your margin on 500+ wholesale products, share with friends and family, and get daily direct bank payouts.
+            </p>
+          </div>
+          <div>
+            <Link href="/reseller">
+              <Button size="lg" className="bg-emerald-400 hover:bg-emerald-500 text-slate-950 font-bold rounded-2xl px-8 shadow-lg">
+                Start Earning Today <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </div>

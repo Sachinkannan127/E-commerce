@@ -55,12 +55,6 @@ export function Header() {
           </Link>
         </div>
         <div className="flex items-center gap-5">
-          <Link href="/" className="hover:underline font-semibold text-indigo-100 flex items-center gap-1">
-            ✨ Platform Overview
-          </Link>
-          <Link href="/home" className="hover:underline font-bold text-amber-300 flex items-center gap-1">
-            🛍️ Enter Store
-          </Link>
           <Link href="/seller/onboarding" className="hover:underline">
             Become a Seller
           </Link>
@@ -79,7 +73,7 @@ export function Header() {
       {/* Main Navigation Bar */}
       <div className="container flex h-16 items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/home" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center text-white font-black text-xl shadow-md">
             S
           </div>
