@@ -198,26 +198,36 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           </div>
         </div>
 
-        {/* Content */}
+          {/* Content */}
         <div className="flex-1 flex flex-col justify-between space-y-2">
           <div className="space-y-1">
-            {product.brand_name && (
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                {product.brand_name}
+            <div className="flex items-center justify-between">
+              {product.brand_name && (
+                <span className="text-[11px] font-bold text-primary uppercase tracking-wider">
+                  {product.brand_name}
+                </span>
+              )}
+              <span className="text-[10px] text-muted-foreground font-semibold flex items-center gap-0.5">
+                <Zap className="h-3 w-3 text-amber-500 fill-amber-500" /> Express
               </span>
-            )}
-            <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+            </div>
+            <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
               {product.title}
             </h3>
           </div>
 
-          {/* Ratings */}
+          {/* Ratings & Social Proof */}
           <div className="flex items-center gap-1.5">
-            <div className="flex items-center gap-0.5 bg-emerald-600 text-white text-[11px] font-bold px-1.5 py-0.5 rounded">
+            <div className="flex items-center gap-0.5 bg-emerald-600 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-md shadow-2xs">
               <span>{product.avg_rating}</span>
               <Star className="h-2.5 w-2.5 fill-white" />
             </div>
-            <span className="text-xs text-muted-foreground">({product.review_count})</span>
+            <span className="text-[11px] text-muted-foreground font-medium">({product.review_count} verified)</span>
+          </div>
+
+          {/* Bank Offer Pill */}
+          <div className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md inline-block">
+            💳 Extra 10% Off with HDFC / UPI
           </div>
 
           {/* Price & Action */}
@@ -237,7 +247,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               size="sm"
               variant="outline"
               onClick={handleQuickAdd}
-              className="rounded-xl px-2.5 h-8 font-medium hover:bg-primary hover:text-white"
+              className="rounded-xl px-2.5 h-8 font-bold hover:bg-primary hover:text-primary-foreground transition-all hover:scale-105"
             >
               <ShoppingCart className="h-3.5 w-3.5" />
             </Button>

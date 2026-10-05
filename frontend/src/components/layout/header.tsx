@@ -19,6 +19,7 @@ import { useTheme } from "next-themes";
 import { SearchBar } from "./search-bar";
 import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
+import { LiveDealsTicker } from "./live-deals-ticker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
+      {/* Realtime Live Deals Ticker */}
+      <LiveDealsTicker />
+
       {/* Top Banner Bar */}
       <div className="hidden md:flex items-center justify-between px-4 sm:px-8 py-1.5 text-xs bg-primary text-primary-foreground">
         <div className="flex items-center gap-4">
@@ -50,7 +54,13 @@ export function Header() {
             🎁 Daily Spin & Win
           </Link>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-5">
+          <Link href="/" className="hover:underline font-semibold text-indigo-100 flex items-center gap-1">
+            ✨ Platform Overview
+          </Link>
+          <Link href="/home" className="hover:underline font-bold text-amber-300 flex items-center gap-1">
+            🛍️ Enter Store
+          </Link>
           <Link href="/seller/onboarding" className="hover:underline">
             Become a Seller
           </Link>
@@ -69,7 +79,7 @@ export function Header() {
       {/* Main Navigation Bar */}
       <div className="container flex h-16 items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/home" className="flex items-center gap-2">
           <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center text-white font-black text-xl shadow-md">
             S
           </div>

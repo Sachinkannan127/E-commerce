@@ -3,6 +3,7 @@ import { MegaMenu } from "@/components/layout/mega-menu";
 import { Footer } from "@/components/layout/footer";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { CompareTray } from "@/components/catalog/CompareTray";
+import { RealtimeDealToast } from "@/components/layout/realtime-deal-toast";
 
 export default function ShopLayout({
   children,
@@ -15,6 +16,7 @@ export default function ShopLayout({
       <MegaMenu />
       <main className="flex-1">{children}</main>
       <CompareTray />
+      <RealtimeDealToast />
       <Footer />
       <MobileBottomNav />
     </div>

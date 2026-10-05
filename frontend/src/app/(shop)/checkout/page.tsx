@@ -56,15 +56,25 @@ export default function CheckoutPage() {
     is_default: true,
   });
 
+  const storeItems = useCartStore((state) => state.items);
+  const storeSubtotal = useCartStore((state) => state.getSubtotal());
+  const storeShipping = useCartStore((state) => state.getShippingFee());
+  const storeTotal = useCartStore((state) => state.getTotal());
+  const storeDiscount = useCartStore((state) => state.discountPaise);
+  const storeCoupon = useCartStore((state) => state.couponCode);
+
   useEffect(() => {
     async function loadData() {
       try {
-        const [addrs, cart] = await Promise.all([fetchUserAddresses(), fetchCart()]);
-        setAddresses(addrs);
-        setCartData(cart);
+        const [addrs, cart] = await Promise.allSettled([fetchUserAddresses(), fetchCart()]);
+        const addressList = addrs.status === "fulfilled" ? addrs.value : [];
+        const cartResult = cart.status === "fulfilled" ? cart.value : null;
 
-        if (addrs.length > 0) {
-          const defaultAddr = addrs.find((a) => a.is_default) || addrs[0];
+        setAddresses(addressList);
+        setCartData(cartResult);
+
+        if (addressList.length > 0) {
+          const defaultAddr = addressList.find((a) => a.is_default) || addressList[0];
           setSelectedAddressId(defaultAddr.id);
           const sum = await fetchCheckoutSummary(defaultAddr.id);
           setSummary(sum);
@@ -85,7 +95,9 @@ export default function CheckoutPage() {
     setSelectedAddressId(addrId);
     try {
       const sum = await fetchCheckoutSummary(addrId);
-      setSummary(sum);
+      if (sum && sum.items_count > 0) {
+        setSummary(sum);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -93,19 +105,39 @@ export default function CheckoutPage() {
 
   const handleCreateAddress = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      // Prompt sign in to save address to account
+      const guestAddr: AddressData = {
+        id: "guest-addr-" + Date.now(),
+        user_id: "guest",
+        ...newAddr,
+      };
+      setAddresses([...addresses, guestAddr]);
+      setSelectedAddressId(guestAddr.id);
+      setShowNewAddressModal(false);
+      return;
+    }
+
     try {
       const created = await createUserAddress(newAddr);
       setAddresses([...addresses, created]);
       setSelectedAddressId(created.id);
       setShowNewAddressModal(false);
       const sum = await fetchCheckoutSummary(created.id);
-      setSummary(sum);
+      if (sum && sum.items_count > 0) {
+        setSummary(sum);
+      }
     } catch (err) {
       console.error(err);
     }
   };
 
   const handlePlaceOrder = async () => {
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/checkout`);
+      return;
+    }
+
     if (!selectedAddressId) {
       alert("Please select a delivery address");
       setStep(1);
@@ -117,7 +149,7 @@ export default function CheckoutPage() {
       const order = await placeOrderApi({
         address_id: selectedAddressId,
         payment_method: paymentMethod,
-        coupon_code: summary?.coupon_code,
+        coupon_code: summary?.coupon_code || storeCoupon || undefined,
       });
 
       clearStoreCart();
@@ -128,6 +160,14 @@ export default function CheckoutPage() {
       setSubmitting(false);
     }
   };
+
+  // Resolved display values from server summary or local store
+  const displayItems = (cartData?.items && cartData.items.length > 0) ? cartData.items : storeItems;
+  const subtotalPaise = summary && summary.items_count > 0 ? summary.subtotal_paise : storeSubtotal;
+  const shippingPaise = summary && summary.items_count > 0 ? summary.shipping_fee_paise : storeShipping;
+  const discountPaise = summary && summary.items_count > 0 ? summary.discount_paise : storeDiscount;
+  const taxPaise = summary && summary.items_count > 0 ? summary.tax_paise : Math.round(subtotalPaise * 0.18);
+  const totalAmountPaise = summary && summary.items_count > 0 ? summary.total_amount_paise : storeTotal;
 
   return (
     <div className="container py-8 space-y-8 max-w-6xl pb-20">
@@ -240,11 +280,15 @@ export default function CheckoutPage() {
               <h2 className="text-xl font-bold">Review Order Items & Delivery</h2>
 
               <div className="space-y-3">
-                {cartData?.items.map((item) => (
+                {displayItems.map((item: any) => (
                   <Card key={item.variant_id} className="p-3.5 rounded-2xl flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-                        <Image src={item.image_url} alt={item.title} fill className="object-cover" />
+                        {item.image_url ? (
+                          <Image src={item.image_url} alt={item.title} fill className="object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">No img</div>
+                        )}
                       </div>
                       <div className="space-y-0.5">
                         <h4 className="text-xs font-semibold line-clamp-1">{item.title}</h4>
@@ -318,7 +362,7 @@ export default function CheckoutPage() {
                   onClick={handlePlaceOrder}
                   className="rounded-2xl px-8 font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-lg"
                 >
-                  {submitting ? "Placing Order..." : `Pay ${formatPrice(summary?.total_amount_paise || 0)} & Confirm`}
+                  {submitting ? "Placing Order..." : `Pay ${formatPrice(totalAmountPaise)} & Confirm`}
                 </Button>
               </div>
             </div>
@@ -333,35 +377,35 @@ export default function CheckoutPage() {
             <div className="space-y-2.5 text-xs">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span>Items Subtotal</span>
-                <span className="text-foreground font-semibold">{formatPrice(summary?.subtotal_paise || 0)}</span>
+                <span className="text-foreground font-semibold">{formatPrice(subtotalPaise)}</span>
               </div>
 
-              {summary && summary.discount_paise > 0 && (
+              {discountPaise > 0 && (
                 <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
-                  <span>Promo Discount ({summary.coupon_code})</span>
-                  <span>-{formatPrice(summary.discount_paise)}</span>
+                  <span>Promo Discount {summary?.coupon_code || storeCoupon ? `(${summary?.coupon_code || storeCoupon})` : ""}</span>
+                  <span>-{formatPrice(discountPaise)}</span>
                 </div>
               )}
 
               <div className="flex items-center justify-between text-muted-foreground">
                 <span>Shipping Fee</span>
                 <span>
-                  {summary?.shipping_fee_paise === 0 ? (
+                  {shippingPaise === 0 ? (
                     <span className="text-emerald-600 dark:text-emerald-400 font-bold">FREE</span>
                   ) : (
-                    formatPrice(summary?.shipping_fee_paise || 0)
+                    formatPrice(shippingPaise)
                   )}
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-muted-foreground">
                 <span>Estimated Taxes (18% GST)</span>
-                <span>{formatPrice(summary?.tax_paise || 0)}</span>
+                <span>{formatPrice(taxPaise)}</span>
               </div>
 
               <div className="pt-3 border-t flex items-baseline justify-between text-base font-black text-foreground">
                 <span>Total Amount</span>
-                <span>{formatPrice(summary?.total_amount_paise || 0)}</span>
+                <span>{formatPrice(totalAmountPaise)}</span>
               </div>
             </div>
 

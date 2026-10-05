@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Filter,
@@ -113,8 +114,13 @@ export default function ProductsListingPage() {
     } else {
       params.delete(key);
     }
-    params.set("page", "1"); // Reset to page 1 on filter update
+    if (key !== "page") {
+      params.set("page", "1"); // Only reset to page 1 on other filter updates
+    }
     router.push(`/products?${params.toString()}`);
+    if (key === "page") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   const clearAllFilters = () => {
@@ -372,6 +378,28 @@ export default function ProductsListingPage() {
 
         {/* Product Grid Area */}
         <main className="col-span-1 md:col-span-3 space-y-6">
+          {/* Sponsored Top Banner Ad in Catalog */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-rose-500/10 to-purple-500/15 border border-amber-500/30 flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-amber-500 text-slate-950 font-bold text-[10px]">
+                  Sponsored Deal
+                </Badge>
+                <span className="text-xs font-bold text-foreground">
+                  Mega Festive Offer: Flat 20% Instant Discount
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Use promo code <strong className="text-foreground">FESTIVE20</strong> at checkout on eligible electronics & fashion items.
+              </p>
+            </div>
+            <Link href="/spin-and-win" className="hidden sm:inline-block flex-shrink-0">
+              <Button size="sm" className="rounded-xl font-bold bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs shadow-sm">
+                🎁 Spin Wheel
+              </Button>
+            </Link>
+          </div>
+
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -407,25 +435,50 @@ export default function ProductsListingPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-8">
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-8">
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page <= 1}
                 onClick={() => updateParam("page", String(page - 1))}
-                className="rounded-xl"
+                className="rounded-xl font-medium"
               >
                 Previous
               </Button>
-              <span className="text-xs font-semibold px-3 py-1 bg-muted rounded-xl">
-                Page {page} of {totalPages}
-              </span>
+
+              {/* Numbered Page Buttons */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+                  .map((p, idx, arr) => {
+                    const prev = arr[idx - 1];
+                    const isCurrent = p === page;
+                    return (
+                      <div key={p} className="flex items-center gap-1">
+                        {prev && p - prev > 1 && (
+                          <span className="px-1 text-xs text-muted-foreground">...</span>
+                        )}
+                        <Button
+                          size="sm"
+                          variant={isCurrent ? "default" : "outline"}
+                          onClick={() => updateParam("page", String(p))}
+                          className={`h-8 w-8 p-0 rounded-xl font-bold text-xs ${
+                            isCurrent ? "shadow-sm" : "hover:bg-muted"
+                          }`}
+                        >
+                          {p}
+                        </Button>
+                      </div>
+                    );
+                  })}
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page >= totalPages}
                 onClick={() => updateParam("page", String(page + 1))}
-                className="rounded-xl"
+                className="rounded-xl font-medium"
               >
                 Next
               </Button>

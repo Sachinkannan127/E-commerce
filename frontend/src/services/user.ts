@@ -19,8 +19,15 @@ export interface AddressData {
 }
 
 export async function fetchUserAddresses(): Promise<AddressData[]> {
-  const res = await apiClient.get<ApiResponse<AddressData[]>>("/users/addresses");
-  return res.data.data;
+  try {
+    const res = await apiClient.get<ApiResponse<AddressData[]>>("/users/addresses");
+    return res.data?.data || [];
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      return [];
+    }
+    return [];
+  }
 }
 
 export async function createUserAddress(data: Omit<AddressData, "id" | "user_id">): Promise<AddressData> {

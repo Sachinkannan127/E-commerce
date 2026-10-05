@@ -8,7 +8,7 @@ from app.schemas.cart_and_order import (
 )
 from app.schemas.common import APIResponse
 from app.services.checkout_service import CheckoutService
-from app.middlewares.auth_guard import get_current_user
+from app.middlewares.auth_guard import get_current_user, get_current_user_optional
 from app.models.user import User
 
 router = APIRouter(prefix="/checkout", tags=["Checkout"])
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/checkout", tags=["Checkout"])
 @router.post("/summary", response_model=APIResponse[CheckoutSummaryResponse])
 async def get_checkout_summary(
     data: CheckoutSummaryRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     summary = await CheckoutService.get_checkout_summary(
         user=current_user,

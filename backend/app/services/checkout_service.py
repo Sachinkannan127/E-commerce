@@ -30,34 +30,48 @@ from app.core.logging import logger
 class CheckoutService:
     @staticmethod
     async def get_checkout_summary(
-        user: User,
+        user: Optional[User] = None,
         address_id: Optional[str] = None,
         coupon_code: Optional[str] = None
     ) -> CheckoutSummaryResponse:
         cart_res = await CartService.get_cart_response(user=user)
         if not cart_res.items:
-            raise BadRequestException("Your cart is empty")
+            return CheckoutSummaryResponse(
+                items_count=0,
+                subtotal_paise=0,
+                shipping_fee_paise=settings.DEFAULT_SHIPPING_FEE_PAISE,
+                tax_paise=0,
+                discount_paise=0,
+                total_amount_paise=settings.DEFAULT_SHIPPING_FEE_PAISE,
+                coupon_code=None,
+                is_free_shipping=False,
+                shipping_address=None,
+            )
 
         selected_addr: Optional[AddressSnapshot] = None
-        if address_id:
-            addr = await Address.get(PydanticObjectId(address_id))
-            if addr and addr.user_id == user.id:
-                selected_addr = AddressSnapshot(**addr.model_dump())
-        else:
-            default_addr = await Address.find_one(
-                Address.user_id == user.id,
-                Address.is_default == True,
-                Address.is_deleted == False
-            )
-            if default_addr:
-                selected_addr = AddressSnapshot(**default_addr.model_dump())
+        if user:
+            if address_id:
+                try:
+                    addr = await Address.get(PydanticObjectId(address_id))
+                    if addr and addr.user_id == user.id and not addr.is_deleted:
+                        selected_addr = AddressSnapshot(**addr.model_dump())
+                except Exception:
+                    pass
+            if not selected_addr:
+                default_addr = await Address.find_one(
+                    Address.user_id == user.id,
+                    Address.is_default == True,
+                    Address.is_deleted == False
+                )
+                if default_addr:
+                    selected_addr = AddressSnapshot(**default_addr.model_dump())
 
         # Subtotal & shipping
         subtotal = cart_res.subtotal_paise
         discount = cart_res.discount_paise
         shipping = cart_res.shipping_fee_paise
 
-        # 18% GST calculation (embedded in total or calculated)
+        # 18% GST calculation
         tax_paise = int(subtotal * 0.18)
         total_amount = max(0, subtotal + shipping - discount)
 
