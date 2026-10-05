@@ -14,481 +14,366 @@ import {
   Award,
   CreditCard,
   Gift,
-  ExternalLink,
-  Percent,
-  CheckCircle2,
-  Users,
   ChevronLeft,
   ChevronRight,
   ShoppingBag,
   TrendingUp,
-  Store,
-  Layers,
+  Percent,
+  Truck,
+  RotateCcw,
+  Star,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { fetchProducts } from "@/services/catalog";
+import { ProductSummary } from "@/types/product";
+import { ProductCard } from "@/components/product/product-card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const HERO_ADS = [
+// 1. FLIPKART BIG HERO BANNERS
+const HERO_SLIDES = [
   {
     id: 1,
-    tag: "Sponsored Mega Carnival",
-    pill: "Flat 20% Code: FESTIVE20",
-    title: "Apple & Samsung Flagship Mega Fest",
-    highlight: "Up to ₹15,000 Instant Bank Off",
-    desc: "iPhone 15 Pro Max & Galaxy S24 Ultra with No Cost EMI from ₹2,499/mo + Free 1-Year Apple Care+ / Galaxy Buds 2 Pro.",
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80",
+    badge: "Big Billion Days Carnival",
+    pill: "Flat 20% Off Code: FESTIVE20",
+    title: "Flagship Smartphones & Gadgets",
+    subtitle: "iPhone 15 Pro Max & Galaxy S24 Ultra",
+    desc: "Starting at ₹2,499/mo No Cost EMI + Instant ₹10,000 Bank Cashback & 1-Year Free Screen Replacement.",
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900&q=80",
     categorySlug: "mobiles",
     cta: "Shop Flagships Now",
-    gradient: "from-indigo-950 via-purple-900 to-indigo-900",
+    gradient: "from-blue-950 via-indigo-900 to-slate-950",
   },
   {
     id: 2,
-    tag: "Ajio Style Week",
-    pill: "Min 50% - 80% Off",
-    title: "Curated Luxury & Streetwear Drops",
-    highlight: "Tommy Hilfiger, Zara & Nike",
-    desc: "Redefine your wardrobe with runway apparel, limited-edition couture, and verified original sneakers.",
-    image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80",
+    badge: "Ajio & Flipkart Style Fest",
+    pill: "50% - 80% Off",
+    title: "Trending Runway Fashion & Sneakers",
+    subtitle: "Nike, Puma, Zara & Tommy Hilfiger",
+    desc: "Step up your seasonal wardrobe with premium streetwear, ethnic couture, and verified original kicks.",
+    image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=900&q=80",
     categorySlug: "fashion",
-    cta: "Explore Runway Drops",
-    gradient: "from-purple-950 via-fuchsia-900 to-slate-950",
+    cta: "Explore Fashion Deals",
+    gradient: "from-purple-950 via-fuchsia-950 to-slate-950",
   },
   {
     id: 3,
-    tag: "Smart Living Ad",
+    badge: "Smart Living Revolution",
     pill: "Flat ₹5,000 Instant Off",
-    title: "Dyson & Smart Home Revolution",
-    highlight: "Cordless V12 & Air Purifiers",
-    desc: "Experience acoustic suction power, HEPA air purification, and smart kitchen cookware at festive pricing.",
-    image: "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=800&q=80",
+    title: "Dyson & Smart Home Appliances",
+    subtitle: "Cordless V12, Air Purifiers & Kitchen",
+    desc: "Upgrade your living space with intelligent acoustic suction, smart air purifiers, and automated kitchenware.",
+    image: "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=900&q=80",
     categorySlug: "home-kitchen",
-    cta: "Claim Dyson Deals",
-    gradient: "from-zinc-950 via-teal-950 to-slate-900",
+    cta: "Claim Smart Home Offers",
+    gradient: "from-teal-950 via-slate-900 to-cyan-950",
   },
   {
     id: 4,
-    tag: "Audio Bonanza",
-    pill: "Starting ₹799",
-    title: "Sony & boAt Spatial Sound Fest",
-    highlight: "Noise Cancellation Earbuds & Bars",
-    desc: "Cinematic Dolby Atmos bass and 60-hour playtime bluetooth earbuds with free extended warranty.",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80",
+    badge: "Audio & Entertainment Fest",
+    pill: "Starting at ₹799",
+    title: "Sony & boAt Spatial Bass Fest",
+    subtitle: "Dolby Atmos Soundbars & ANC Earbuds",
+    desc: "Active noise cancellation wireless earbuds with up to 60h playback and free 1-year extended warranty.",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=900&q=80",
     categorySlug: "electronics",
     cta: "Grab Audio Deals",
-    gradient: "from-slate-950 via-rose-950 to-black",
+    gradient: "from-rose-950 via-zinc-900 to-black",
   },
 ];
 
-const LIGHTNING_BLITZ_DEALS = [
+// 2. FLIPKART SIGNATURE 4-IN-1 QUADRANT CARDS
+const QUADRANT_SECTIONS = [
   {
-    title: "Dyson V12 Detect Slim Total Clean Cordless Vacuum",
-    price: "₹44,990",
-    originalPrice: "₹57,900",
-    discount: "22% OFF",
-    claimedPct: 88,
-    unitsLeft: 3,
-    viewers: 34,
-    image: "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=400&q=80",
-    categorySlug: "home-kitchen",
-  },
-  {
-    title: "Sony WH-1000XM5 Wireless Active Noise Cancelling",
-    price: "₹24,990",
-    originalPrice: "₹34,990",
-    discount: "29% OFF",
-    claimedPct: 76,
-    unitsLeft: 5,
-    viewers: 21,
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
-    categorySlug: "electronics",
+    title: "Best of Electronics",
+    viewAllHref: "/products?category_slug=electronics",
+    items: [
+      { name: "Smartwatches", offer: "From ₹999", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&q=80", slug: "electronics" },
+      { name: "Wireless Audio", offer: "Min 50% Off", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80", slug: "electronics" },
+      { name: "Fast Chargers", offer: "From ₹299", img: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=300&q=80", slug: "mobiles" },
+      { name: "DSLR & Cameras", offer: "Up to ₹15,000 Off", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300&q=80", slug: "electronics" },
+    ],
   },
   {
-    title: "Nike Air Max Pulse Men's Athletic Running Shoes",
-    price: "₹4,999",
-    originalPrice: "₹10,995",
-    discount: "55% OFF",
-    claimedPct: 94,
-    unitsLeft: 2,
-    viewers: 49,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
-    categorySlug: "footwear",
+    title: "Top Deals on Fashion",
+    viewAllHref: "/products?category_slug=fashion",
+    items: [
+      { name: "Running Shoes", offer: "Min 40% Off", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80", slug: "footwear" },
+      { name: "Men's Graphic Tees", offer: "Under ₹499", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300&q=80", slug: "fashion" },
+      { name: "Women's Ethnic", offer: "50-70% Off", img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=300&q=80", slug: "fashion" },
+      { name: "Casual Sneakers", offer: "From ₹799", img: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=300&q=80", slug: "footwear" },
+    ],
   },
   {
-    title: "Samsung Galaxy S24 Ultra AI 5G (Titanium Gray, 256GB)",
-    price: "₹1,19,999",
-    originalPrice: "₹1,34,999",
-    discount: "11% OFF",
-    claimedPct: 65,
-    unitsLeft: 8,
-    viewers: 62,
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80",
-    categorySlug: "mobiles",
+    title: "Home & Kitchen Essentials",
+    viewAllHref: "/products?category_slug=home-kitchen",
+    items: [
+      { name: "Cookware Sets", offer: "From ₹499", img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=300&q=80", slug: "home-kitchen" },
+      { name: "Smart Vacuums", offer: "Up to 40% Off", img: "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=300&q=80", slug: "home-kitchen" },
+      { name: "Home Decor Lamps", offer: "Under ₹399", img: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=300&q=80", slug: "home-kitchen" },
+      { name: "Air Purifiers", offer: "Flat ₹3,000 Off", img: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=300&q=80", slug: "home-kitchen" },
+    ],
+  },
+  {
+    title: "Beauty, Food & More",
+    viewAllHref: "/products?category_slug=beauty",
+    items: [
+      { name: "Skincare Serums", offer: "Buy 1 Get 1", img: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&q=80", slug: "beauty" },
+      { name: "Artisanal Coffee", offer: "From ₹349", img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80", slug: "groceries" },
+      { name: "Luxury Perfumes", offer: "Min 35% Off", img: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300&q=80", slug: "beauty" },
+      { name: "Gym Supplements", offer: "Up to 50% Off", img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300&q=80", slug: "sports-fitness" },
+    ],
   },
 ];
 
-const POPULAR_CATEGORIES = [
-  { name: "Electronics", slug: "electronics", image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80", count: "100+ Items" },
-  { name: "Smartphones", slug: "mobiles", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80", count: "50+ Models" },
-  { name: "Fashion & Trends", slug: "fashion", image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&q=80", count: "120+ Styles" },
-  { name: "Footwear", slug: "footwear", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80", count: "60+ Pairs" },
-  { name: "Home & Cookware", slug: "home-kitchen", image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=400&q=80", count: "80+ Items" },
-  { name: "Beauty & Personal", slug: "beauty", image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80", count: "70+ Brands" },
-];
-
-const UNDER_999_DEALS = [
-  { title: "boAt BassHeads 100 Wired Earphones", price: "₹399", old: "₹999", off: "60% OFF", img: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=300&q=80" },
-  { title: "Fastrack Limitless FS1 Smartwatch", price: "₹999", old: "₹2,495", off: "60% OFF", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&q=80" },
-  { title: "Cotton Rich Oversized Graphic Tee", price: "₹499", old: "₹1,299", off: "62% OFF", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300&q=80" },
-  { title: "Stainless Steel Insulated Water Flask", price: "₹449", old: "₹999", off: "55% OFF", img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300&q=80" },
-];
-
-const SPONSORED_BRANDS = [
-  { name: "Apple", logo: "🍎", tag: "Authorised Reseller", discount: "Up to ₹10,000 Off", slug: "mobiles" },
-  { name: "Samsung", logo: "📱", tag: "Galaxy Festival", discount: "Flat 25% Cashback", slug: "mobiles" },
-  { name: "Nike", logo: "👟", tag: "Official Sports Hub", discount: "Min 40% Off", slug: "footwear" },
-  { name: "Puma", logo: "🐆", tag: "Motorsport Collection", discount: "Buy 1 Get 1 at 50%", slug: "footwear" },
-  { name: "Dyson", logo: "🌀", tag: "Smart Living Partner", discount: "Flat ₹5,000 Off", slug: "home-kitchen" },
-  { name: "boAt", logo: "🎧", tag: "Audio King", discount: "Starting ₹899", slug: "electronics" },
-];
-
+// 3. FLIPKART BANK CASHBACK STRIP
 const BANK_OFFERS = [
-  { bank: "HDFC Bank", offer: "10% Instant Discount", sub: "Up to ₹1,500 on Cards & EMI", color: "from-blue-600 to-indigo-700" },
-  { bank: "ICICI Bank", offer: "Flat ₹2,000 Cashback", sub: "On Mobiles & Laptops", color: "from-amber-600 to-orange-700" },
-  { bank: "SBI Card", offer: "5% Unlimited Cashback", sub: "On all Fashion & Home", color: "from-sky-600 to-blue-800" },
-  { bank: "UPI / Google Pay", offer: "Assured ₹100 - ₹500", sub: "On orders above ₹999", color: "from-emerald-600 to-teal-700" },
+  { bank: "Axis Bank", offer: "5% Unlimited Cashback", sub: "On Flipkart & ShopVerse Axis Card", color: "from-rose-600 to-red-800" },
+  { bank: "HDFC Bank", offer: "10% Instant Discount", sub: "Up to ₹1,500 on Credit & EMI", color: "from-blue-600 to-indigo-800" },
+  { bank: "ICICI Bank", offer: "Flat ₹2,000 Off", sub: "On Laptops, Phones & TVs", color: "from-amber-600 to-orange-700" },
+  { bank: "UPI / Paytm", offer: "Assured ₹100 Cashback", sub: "On orders above ₹999", color: "from-emerald-600 to-teal-800" },
 ];
 
 export default function StoreHomePage() {
-  const [activeAdIndex, setActiveAdIndex] = useState(0);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [electronicsProducts, setElectronicsProducts] = useState<ProductSummary[]>([]);
+  const [fashionProducts, setFashionProducts] = useState<ProductSummary[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = useState<ProductSummary[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Auto rotate hero ads every 5 seconds
+  // Auto rotate hero slides every 5 seconds
   useEffect(() => {
     const timer = setInterval(() => {
-      setActiveAdIndex((prev) => (prev + 1) % HERO_ADS.length);
+      setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
 
-  const currentAd = HERO_ADS[activeAdIndex];
+  // Fetch live products for Flipkart product carousels
+  useEffect(() => {
+    async function loadCatalog() {
+      try {
+        const [elecRes, fashRes, sugRes] = await Promise.all([
+          fetchProducts({ category_slug: "electronics", limit: 6 }),
+          fetchProducts({ category_slug: "fashion", limit: 6 }),
+          fetchProducts({ limit: 12, sort: "relevance" }),
+        ]);
+        setElectronicsProducts(elecRes.items || []);
+        setFashionProducts(fashRes.items || []);
+        setSuggestedProducts(sugRes.items || []);
+      } catch (err) {
+        console.error("Failed to load home products:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadCatalog();
+  }, []);
+
+  const currentSlide = HERO_SLIDES[activeSlide];
 
   return (
-    <div className="space-y-10 pb-20">
-      {/* 1. INTERACTIVE ROTATING HERO AD CAROUSEL */}
-      <section className="container pt-4">
-        <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-r ${currentAd.gradient} text-white shadow-2xl p-6 sm:p-10 md:p-12 transition-all duration-700`}>
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 min-h-[360px]">
+    <div className="space-y-6 pb-20 bg-muted/20">
+      {/* 1. FLIPKART WIDESCREEN HERO BANNER SLIDER */}
+      <section className="container pt-3">
+        <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-r ${currentSlide.gradient} text-white shadow-2xl p-6 sm:p-10 md:p-12 transition-all duration-700`}>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 min-h-[340px]">
             <div className="relative z-10 max-w-xl space-y-4 text-center md:text-left">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                <Badge variant="deal" className="animate-bounce">
-                  {currentAd.tag}
+                <Badge className="bg-amber-400 text-slate-950 font-black text-xs px-3 py-1 animate-pulse">
+                  {currentSlide.badge}
                 </Badge>
-                <Badge className="bg-amber-400 text-slate-950 font-bold">
-                  {currentAd.pill}
+                <Badge variant="outline" className="border-white/40 text-white font-bold text-xs">
+                  {currentSlide.pill}
                 </Badge>
               </div>
 
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-                {currentAd.title}
+                {currentSlide.title}
               </h1>
 
               <p className="text-sm font-bold text-amber-300">
-                {currentAd.highlight}
+                {currentSlide.subtitle}
               </p>
 
               <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
-                {currentAd.desc}
+                {currentSlide.desc}
               </p>
 
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
-                <Link href={`/products?category_slug=${currentAd.categorySlug}`}>
-                  <Button size="lg" className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold rounded-full gap-2 shadow-lg">
-                    {currentAd.cta} <ArrowRight className="h-4 w-4" />
+                <Link href={`/products?category_slug=${currentSlide.categorySlug}`}>
+                  <Button size="lg" className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-black rounded-full px-8 gap-2 shadow-xl shadow-amber-500/20">
+                    {currentSlide.cta} <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/spin-and-win">
                   <Button size="lg" variant="outline" className="border-amber-300 text-amber-300 hover:bg-amber-400/10 rounded-full font-bold">
-                    🎁 Daily Spin & Win
+                    🎁 Daily SuperCoins Spin
                   </Button>
                 </Link>
               </div>
             </div>
 
-            {/* Visual Hero Ad Graphic */}
+            {/* Visual Slide Image Card */}
             <div className="relative w-full max-w-xs sm:max-w-sm aspect-square rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 flex-shrink-0">
               <Image
-                src={currentAd.image}
-                alt={currentAd.title}
+                src={currentSlide.image}
+                alt={currentSlide.title}
                 fill
-                className="object-cover transition-all duration-500 hover:scale-105"
                 priority
+                className="object-cover transition-all duration-500 hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4 text-white">
-                <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">Ad • Verified Partner</span>
-                <p className="text-xs font-semibold">{currentAd.highlight}</p>
+                <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">Big Billion Fest • Verified Partner</span>
+                <p className="text-xs font-semibold">{currentSlide.subtitle}</p>
               </div>
             </div>
           </div>
 
-          {/* Ad Carousel Controls */}
+          {/* Slider Prev / Next Controls */}
+          <div className="absolute inset-y-0 left-2 sm:left-4 flex items-center">
+            <button
+              onClick={() => setActiveSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)}
+              className="h-10 w-10 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+              aria-label="Previous Slide"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+          </div>
+          <div className="absolute inset-y-0 right-2 sm:right-4 flex items-center">
+            <button
+              onClick={() => setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length)}
+              className="h-10 w-10 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+              aria-label="Next Slide"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Pill Indicators */}
           <div className="flex items-center justify-center gap-2 pt-6">
-            {HERO_ADS.map((ad, idx) => (
+            {HERO_SLIDES.map((s, idx) => (
               <button
-                key={ad.id}
-                onClick={() => setActiveAdIndex(idx)}
+                key={s.id}
+                onClick={() => setActiveSlide(idx)}
                 className={`h-2.5 rounded-full transition-all ${
-                  activeAdIndex === idx ? "w-8 bg-amber-400" : "w-2.5 bg-white/40 hover:bg-white/70"
+                  activeSlide === idx ? "w-8 bg-amber-400" : "w-2.5 bg-white/40 hover:bg-white/70"
                 }`}
                 aria-label={`Slide ${idx + 1}`}
               />
             ))}
           </div>
-
-          {/* Glowing Ambient Blobs */}
-          <div className="absolute -right-16 -top-16 h-80 w-80 rounded-full bg-purple-500/25 blur-3xl pointer-events-none" />
-          <div className="absolute left-12 -bottom-12 h-64 w-64 rounded-full bg-indigo-500/30 blur-2xl pointer-events-none" />
         </div>
       </section>
 
-      {/* 2. REAL-TIME LIGHTNING BLITZ DEALS WITH STOCK PROGRESS BAR */}
+      {/* 2. FLIPKART SIGNATURE "BEST OF ELECTRONICS" DEAL CAROUSEL */}
       <section className="container">
-        <div className="rounded-3xl border-2 border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-amber-500/5 to-purple-500/10 p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-rose-500 text-white shadow-lg animate-pulse">
-                <Flame className="h-6 w-6" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-black tracking-tight text-foreground">Real-Time Lightning Blitz Deals</h2>
-                  <Badge className="bg-rose-500 text-white text-[10px] font-bold animate-pulse">
-                    Live Stock Decrement
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">High-demand deals expiring in real-time. Lock your cart before stock runs out!</p>
-              </div>
+        <div className="flex flex-col lg:flex-row gap-4 p-4 rounded-3xl bg-card border shadow-xs">
+          {/* Left Promo Card */}
+          <div className="lg:w-64 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-700 to-blue-800 text-white p-6 flex flex-col justify-between items-center text-center space-y-4 flex-shrink-0">
+            <div className="space-y-2">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-300">Mega Savings</span>
+              <h2 className="text-2xl font-black">Best of Electronics</h2>
+              <p className="text-xs text-blue-100">Top Rated Audio, Smartwatches & Laptops</p>
             </div>
-
-            <div className="flex items-center gap-2 text-sm font-semibold bg-background/90 backdrop-blur px-4 py-2 rounded-2xl border shadow-xs">
-              <Clock className="h-4 w-4 text-rose-500 animate-spin" />
-              <span>Deal Ends In:</span>
-              <span className="text-rose-600 dark:text-rose-400 font-mono font-bold">02h : 14m : 55s</span>
-            </div>
+            <Link href="/products?category_slug=electronics" className="w-full">
+              <Button size="sm" className="w-full font-bold bg-white text-blue-700 hover:bg-blue-50 rounded-xl shadow-md">
+                VIEW ALL
+              </Button>
+            </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {LIGHTNING_BLITZ_DEALS.map((deal, idx) => (
-              <Card key={idx} className="overflow-hidden rounded-2xl p-3.5 space-y-3 hover:shadow-xl transition-all border-2 hover:border-rose-500/50 flex flex-col justify-between">
-                <div className="space-y-2.5">
-                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
-                    <Image
-                      src={deal.image}
-                      alt={deal.title}
-                      fill
-                      className="object-cover"
-                    />
-                    <Badge variant="deal" className="absolute top-2 left-2 text-[10px] font-black">
-                      {deal.discount}
-                    </Badge>
-                    <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Users className="h-3 w-3 text-amber-300" /> {deal.viewers} viewing now
+          {/* Horizontal Product Scroller */}
+          <div className="flex-1 overflow-x-auto no-scrollbar py-1">
+            <div className="flex items-stretch gap-3 min-w-max">
+              {loading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="w-48 p-3 rounded-2xl border space-y-3">
+                      <Skeleton className="aspect-square w-full rounded-xl" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
                     </div>
-                  </div>
+                  ))
+                : electronicsProducts.map((p) => (
+                    <Link
+                      key={p.id}
+                      href={`/products/${p.slug}`}
+                      className="group w-48 p-3 rounded-2xl border bg-card hover:border-primary/50 hover:shadow-md transition-all flex flex-col justify-between text-center space-y-2"
+                    >
+                      <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
+                        <Image
+                          src={p.thumbnail_url || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80"}
+                          alt={p.name}
+                          fill
+                          sizes="180px"
+                          className="object-cover group-hover:scale-105 transition-transform"
+                        />
+                        {p.discount_pct > 0 && (
+                          <Badge variant="deal" className="absolute top-2 left-2 text-[10px]">
+                            {p.discount_pct}% OFF
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-0.5">
+                        <h4 className="font-semibold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                          {p.name}
+                        </h4>
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block">
+                          ₹{(p.price_paise / 100).toLocaleString("en-IN")}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground line-through">
+                          ₹{(p.compare_at_price_paise / 100).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
-                  <div className="space-y-1">
-                    <h4 className="font-semibold text-xs line-clamp-2">{deal.title}</h4>
-                    <div className="flex items-baseline gap-2 pt-1">
-                      <span className="text-base font-black text-foreground">{deal.price}</span>
-                      <span className="text-xs text-muted-foreground line-through">{deal.originalPrice}</span>
-                    </div>
-                  </div>
+      {/* 3. FLIPKART 4-IN-1 QUADRANT MULTI-DEAL BOXES */}
+      <section className="container">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {QUADRANT_SECTIONS.map((sec, idx) => (
+            <Card key={idx} className="p-4 rounded-3xl border shadow-xs space-y-3 flex flex-col justify-between">
+              <div className="flex items-center justify-between pb-1 border-b">
+                <h3 className="font-bold text-sm text-foreground">{sec.title}</h3>
+                <Link href={sec.viewAllHref} className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
 
-                  {/* Stock Claim Progress Bar */}
-                  <div className="space-y-1 pt-1">
-                    <div className="flex justify-between text-[11px] font-bold">
-                      <span className="text-rose-600 dark:text-rose-400">{deal.claimedPct}% Claimed</span>
-                      <span className="text-amber-600 dark:text-amber-400">Only {deal.unitsLeft} Left!</span>
-                    </div>
-                    <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-amber-500 to-rose-600 rounded-full transition-all"
-                        style={{ width: `${deal.claimedPct}%` }}
+              {/* 2x2 Grid of items */}
+              <div className="grid grid-cols-2 gap-2.5">
+                {sec.items.map((item, i) => (
+                  <Link
+                    key={i}
+                    href={`/products?category_slug=${item.slug}`}
+                    className="group block p-2 rounded-xl border border-border/50 hover:border-primary/40 bg-muted/20 hover:bg-card transition-all text-center space-y-1"
+                  >
+                    <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-muted">
+                      <Image
+                        src={item.img}
+                        alt={item.name}
+                        fill
+                        sizes="100px"
+                        className="object-cover group-hover:scale-105 transition-transform"
                       />
                     </div>
-                  </div>
-                </div>
-
-                <Link href={`/products?category_slug=${deal.categorySlug}`} className="pt-2">
-                  <Button size="sm" className="w-full rounded-xl font-bold bg-rose-500 hover:bg-rose-600 text-white shadow-md">
-                    Claim Deal Now
-                  </Button>
-                </Link>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 3. CATEGORY SPOTLIGHT GRID */}
-      <section className="container space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5 text-primary" />
-            <div>
-              <h2 className="text-xl font-bold tracking-tight">Shop by Category Hubs</h2>
-              <p className="text-xs text-muted-foreground">Explore 500+ curated products across 10 top categories</p>
-            </div>
-          </div>
-          <Link href="/products" className="text-xs sm:text-sm font-semibold text-primary hover:underline flex items-center gap-1">
-            Browse All Catalog <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {POPULAR_CATEGORIES.map((cat) => (
-            <Link key={cat.slug} href={`/products?category_slug=${cat.slug}`}>
-              <Card className="group overflow-hidden rounded-2xl hover:shadow-md transition-all hover:border-primary/50 text-center p-3">
-                <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted mb-2">
-                  <Image
-                    src={cat.image}
-                    alt={cat.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 50vw, 20vw"
-                  />
-                </div>
-                <h3 className="font-semibold text-sm line-clamp-1">{cat.name}</h3>
-                <span className="text-xs text-primary font-medium">
-                  {cat.count}
-                </span>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. BANK & PAYMENT CASHBACK OFFERS AD STRIP */}
-      <section className="container">
-        <div className="flex items-center justify-between pb-3">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-primary" />
-            <h3 className="text-sm font-bold text-foreground">Partner Bank & Payment Promotions</h3>
-          </div>
-          <span className="text-[11px] text-muted-foreground">Instant Discount Applied at Checkout</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {BANK_OFFERS.map((b, idx) => (
-            <Card
-              key={idx}
-              className={`p-4 rounded-2xl bg-gradient-to-br ${b.color} text-white shadow-md flex items-center justify-between gap-3 border-0 hover:scale-102 transition-transform`}
-            >
-              <div className="space-y-0.5">
-                <span className="text-[11px] font-black uppercase tracking-wider text-white/80">{b.bank}</span>
-                <h4 className="text-sm font-bold">{b.offer}</h4>
-                <p className="text-[11px] text-white/90">{b.sub}</p>
+                    <h4 className="text-[11px] font-semibold line-clamp-1">{item.name}</h4>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 block">
+                      {item.offer}
+                    </span>
+                  </Link>
+                ))}
               </div>
-              <Percent className="h-7 w-7 text-white/40 flex-shrink-0" />
-            </Card>
-          ))}
-        </div>
-      </section>
 
-      {/* 5. DUAL SPONSORED ADS (Audio + Sneaker Drop) */}
-      <section className="container">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Ad 1: Audio */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-zinc-900 to-black text-white p-6 sm:p-8 flex flex-col justify-between min-h-[260px] shadow-xl border border-zinc-800">
-            <div className="relative z-10 space-y-3 max-w-sm">
-              <Badge className="bg-rose-500 text-white text-[10px] uppercase font-bold">
-                Sponsored • Audio Fest
-              </Badge>
-              <h3 className="text-2xl font-black">Sony & boAt Spatial Audio</h3>
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                Active Noise Cancellation earbuds and Dolby Atmos soundbars with up to 60% instant savings.
-              </p>
-              <div>
-                <Link href="/products?category_slug=electronics">
-                  <Button size="sm" className="rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold gap-1.5 shadow-md">
-                    Explore Audio Deals <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="absolute right-0 bottom-0 top-0 w-1/2 opacity-60 md:opacity-90 pointer-events-none">
-              <Image
-                src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80"
-                alt="Headphones Ad"
-                fill
-                className="object-cover"
-              />
-            </div>
-          </div>
-
-          {/* Ad 2: Sneakers */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950 text-white p-6 sm:p-8 flex flex-col justify-between min-h-[260px] shadow-xl border border-indigo-900/50">
-            <div className="relative z-10 space-y-3 max-w-sm">
-              <Badge className="bg-amber-400 text-slate-950 text-[10px] uppercase font-black">
-                Sponsored • Sneaker Hub
-              </Badge>
-              <h3 className="text-2xl font-black">Nike & Puma Air Drops</h3>
-              <p className="text-xs text-indigo-200 leading-relaxed">
-                Limited edition running kicks, high-top street trainers, and gym wear at flat 45% off.
-              </p>
-              <div>
-                <Link href="/products?category_slug=footwear">
-                  <Button size="sm" className="rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold gap-1.5 shadow-md">
-                    Claim Sneaker Drop <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="absolute right-0 bottom-0 top-0 w-1/2 opacity-60 md:opacity-90 pointer-events-none">
-              <Image
-                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80"
-                alt="Sneakers Ad"
-                fill
-                className="object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. BUDGET SUPER-SAVERS (UNDER ₹499 & ₹999) */}
-      <section className="container space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Tag className="h-5 w-5 text-emerald-500" />
-            <div>
-              <h2 className="text-xl font-bold tracking-tight">Budget Super Savers • Under ₹499 & ₹999</h2>
-              <p className="text-xs text-muted-foreground">High-demand everyday essentials with free delivery</p>
-            </div>
-          </div>
-          <Link href="/products" className="text-xs sm:text-sm font-semibold text-primary hover:underline flex items-center gap-1">
-            View All Savers <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {UNDER_999_DEALS.map((deal, idx) => (
-            <Card key={idx} className="p-3 rounded-2xl space-y-2 hover:shadow-md transition-all group border">
-              <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
-                <Image src={deal.img} alt={deal.title} fill className="object-cover group-hover:scale-105 transition-transform" />
-                <Badge variant="deal" className="absolute top-2 left-2 text-[10px]">
-                  {deal.off}
-                </Badge>
-              </div>
-              <h4 className="font-semibold text-xs line-clamp-1">{deal.title}</h4>
-              <div className="flex items-baseline gap-2">
-                <span className="text-sm font-black text-foreground">{deal.price}</span>
-                <span className="text-[11px] text-muted-foreground line-through">{deal.old}</span>
-              </div>
-              <Link href="/products">
-                <Button size="sm" variant="outline" className="w-full rounded-xl text-xs font-bold mt-1">
-                  Buy Under ₹999
+              <Link href={sec.viewAllHref}>
+                <Button size="sm" variant="ghost" className="w-full text-xs font-bold text-primary hover:bg-primary/10 rounded-xl">
+                  Explore More Deals
                 </Button>
               </Link>
             </Card>
@@ -496,52 +381,180 @@ export default function StoreHomePage() {
         </div>
       </section>
 
-      {/* 7. OFFICIAL SPONSORED BRAND STORES RIBBON */}
-      <section className="container space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-amber-500" />
-            <h2 className="text-xl font-bold tracking-tight">Official Sponsored Brand Stores</h2>
-          </div>
-          <span className="text-xs text-muted-foreground">100% Genuine Certified Brands</span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {SPONSORED_BRANDS.map((brand, idx) => (
-            <Link key={idx} href={`/products?category_slug=${brand.slug}`}>
-              <Card className="p-4 rounded-2xl text-center space-y-2 hover:shadow-md transition-all hover:border-primary/50 group bg-card/60">
-                <div className="text-3xl">{brand.logo}</div>
-                <h3 className="font-bold text-sm text-foreground">{brand.name}</h3>
-                <p className="text-[11px] text-muted-foreground">{brand.tag}</p>
-                <Badge variant="secondary" className="text-[10px] text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  {brand.discount}
-                </Badge>
-              </Card>
-            </Link>
+      {/* 4. BANK & INSTANT PAYMENT DISCOUNTS RIBBON */}
+      <section className="container">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {BANK_OFFERS.map((b, idx) => (
+            <div
+              key={idx}
+              className={`p-4 rounded-2xl bg-gradient-to-br ${b.color} text-white shadow-md flex items-center justify-between gap-3`}
+            >
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-white/80">{b.bank}</span>
+                <h4 className="text-xs font-bold">{b.offer}</h4>
+                <p className="text-[10px] text-white/90">{b.sub}</p>
+              </div>
+              <Percent className="h-6 w-6 text-white/40 flex-shrink-0" />
+            </div>
           ))}
         </div>
       </section>
 
-      {/* 8. MEESHO-STYLE RESELLER EARNINGS PROMO BANNER */}
+      {/* 5. FLIPKART "TOP DEALS ON FASHION" HORIZONTAL PRODUCT CAROUSEL */}
       <section className="container">
-        <div className="rounded-3xl bg-gradient-to-r from-emerald-950 via-teal-900 to-emerald-900 text-white p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl border border-emerald-700/30">
+        <div className="flex flex-col lg:flex-row gap-4 p-4 rounded-3xl bg-card border shadow-xs">
+          {/* Left Promo Card */}
+          <div className="lg:w-64 rounded-2xl bg-gradient-to-br from-fuchsia-700 via-purple-800 to-indigo-900 text-white p-6 flex flex-col justify-between items-center text-center space-y-4 flex-shrink-0">
+            <div className="space-y-2">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-300">Ajio Style Week</span>
+              <h2 className="text-2xl font-black">Top Deals on Fashion</h2>
+              <p className="text-xs text-purple-100">Handpicked Sneakers, Kurtis & Streetwear</p>
+            </div>
+            <Link href="/products?category_slug=fashion" className="w-full">
+              <Button size="sm" className="w-full font-bold bg-white text-purple-800 hover:bg-purple-50 rounded-xl shadow-md">
+                VIEW ALL
+              </Button>
+            </Link>
+          </div>
+
+          {/* Horizontal Product Scroller */}
+          <div className="flex-1 overflow-x-auto no-scrollbar py-1">
+            <div className="flex items-stretch gap-3 min-w-max">
+              {loading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="w-48 p-3 rounded-2xl border space-y-3">
+                      <Skeleton className="aspect-square w-full rounded-xl" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                  ))
+                : fashionProducts.map((p) => (
+                    <Link
+                      key={p.id}
+                      href={`/products/${p.slug}`}
+                      className="group w-48 p-3 rounded-2xl border bg-card hover:border-primary/50 hover:shadow-md transition-all flex flex-col justify-between text-center space-y-2"
+                    >
+                      <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
+                        <Image
+                          src={p.thumbnail_url || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80"}
+                          alt={p.name}
+                          fill
+                          sizes="180px"
+                          className="object-cover group-hover:scale-105 transition-transform"
+                        />
+                        {p.discount_pct > 0 && (
+                          <Badge variant="deal" className="absolute top-2 left-2 text-[10px]">
+                            {p.discount_pct}% OFF
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-0.5">
+                        <h4 className="font-semibold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                          {p.name}
+                        </h4>
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block">
+                          ₹{(p.price_paise / 100).toLocaleString("en-IN")}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground line-through">
+                          ₹{(p.compare_at_price_paise / 100).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. SUGGESTED FOR YOU / TRENDING NOW LIVE MARKETPLACE CATALOG */}
+      <section className="container space-y-4 pt-4">
+        <div className="flex items-center justify-between pb-2 border-b">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">Suggested for You</h2>
+            <p className="text-xs text-muted-foreground">Based on your activity & trending customer orders</p>
+          </div>
+          <Link href="/products" className="text-xs sm:text-sm font-bold text-primary hover:underline flex items-center gap-1">
+            Explore All 500+ Items <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="p-3.5 rounded-2xl border bg-card space-y-3">
+                <Skeleton className="aspect-square w-full rounded-xl" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-8 w-full rounded-xl" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {suggestedProducts.map((p) => (
+              <ProductCard key={p.id} product={p} viewMode="grid" />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* 7. MEESHO-STYLE RESELLER OPPORTUNITY BANNER */}
+      <section className="container pt-4">
+        <div className="rounded-3xl bg-gradient-to-r from-emerald-950 via-teal-900 to-emerald-900 text-white p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl border border-emerald-700/30">
           <div className="space-y-3 max-w-xl text-center md:text-left">
             <Badge className="bg-emerald-400 text-slate-950 font-bold text-xs">
-              Ad • Reseller Opportunity
+              Meesho-Style Reseller Hub
             </Badge>
             <h3 className="text-2xl sm:text-3xl font-black">
-              Earn ₹25,000+ / Month by Sharing Products on WhatsApp
+              Earn ₹25,000+ / Month with Zero Investment
             </h3>
             <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
-              Zero stock investment required. Add your margin on 500+ wholesale products, share with friends and family, and get daily direct bank payouts.
+              Add your custom profit margin on 500+ wholesale catalogs, share directly on WhatsApp & Instagram, and let verified suppliers fulfill the orders automatically.
             </p>
           </div>
           <div>
             <Link href="/reseller">
-              <Button size="lg" className="bg-emerald-400 hover:bg-emerald-500 text-slate-950 font-bold rounded-2xl px-8 shadow-lg">
-                Start Earning Today <ArrowRight className="h-4 w-4 ml-2" />
+              <Button size="lg" className="bg-emerald-400 hover:bg-emerald-500 text-slate-950 font-black rounded-2xl px-8 shadow-lg">
+                Start Reselling Now <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. FLIPKART TRUST & CUSTOMER ASSURANCE RIBBON */}
+      <section className="container pt-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-3xl bg-card border shadow-xs text-center">
+          <div className="flex flex-col items-center space-y-1 p-2">
+            <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center mb-1">
+              <Truck className="h-6 w-6" />
+            </div>
+            <h4 className="font-bold text-xs text-foreground">Express Pan-India Delivery</h4>
+            <p className="text-[11px] text-muted-foreground">Free shipping on orders above ₹499</p>
+          </div>
+
+          <div className="flex flex-col items-center space-y-1 p-2">
+            <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-1">
+              <ShieldCheck className="h-6 w-6" />
+            </div>
+            <h4 className="font-bold text-xs text-foreground">100% Genuine Certified</h4>
+            <p className="text-[11px] text-muted-foreground">Directly sourced from verified brand sellers</p>
+          </div>
+
+          <div className="flex flex-col items-center space-y-1 p-2">
+            <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-1">
+              <RotateCcw className="h-6 w-6" />
+            </div>
+            <h4 className="font-bold text-xs text-foreground">7-Day Easy Replacement</h4>
+            <p className="text-[11px] text-muted-foreground">Hassle-free doorstep returns & exchanges</p>
+          </div>
+
+          <div className="flex flex-col items-center space-y-1 p-2">
+            <div className="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center mb-1">
+              <CreditCard className="h-6 w-6" />
+            </div>
+            <h4 className="font-bold text-xs text-foreground">Secure Payment Gateway</h4>
+            <p className="text-[11px] text-muted-foreground">UPI, Cards, EMI & Cash on Delivery</p>
           </div>
         </div>
       </section>
