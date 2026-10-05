@@ -272,7 +272,7 @@ export default function StoreHomePage() {
                   </Button>
                 </Link>
                 <Link href="/products">
-                  <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 rounded-full font-bold">
+                  <Button size="lg" className="bg-white/15 hover:bg-white/25 text-white border border-white/40 backdrop-blur-md rounded-full font-bold px-8 shadow-sm">
                     Browse All 532+ Products
                   </Button>
                 </Link>
