@@ -70,7 +70,7 @@ function ProductsListingContent() {
       try {
         const params: Record<string, any> = {
           page,
-          limit: 16,
+          limit: 24,
           sort,
         };
         if (categorySlug) params.category_slug = categorySlug;
@@ -151,10 +151,10 @@ function ProductsListingContent() {
               ? `Results for "${searchQuery}"`
               : categorySlug
               ? `Category: ${categorySlug.replace("-", " ").toUpperCase()}`
-              : "All Products"}
+              : "All Products Catalog"}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Showing {products.length} of {total} items
+            Showing {products.length} items (Page {page} of {totalPages} • Total {total} Products)
           </p>
         </div>
 

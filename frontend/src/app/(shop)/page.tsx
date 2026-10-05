@@ -23,6 +23,12 @@ import {
   RotateCcw,
   Star,
   Users,
+  Smartphone,
+  Laptop,
+  Shirt,
+  UtensilsCrossed,
+  Sparkle,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +45,7 @@ const HERO_SLIDES = [
     badge: "Big Billion Days Carnival",
     pill: "Flat 20% Off Code: FESTIVE20",
     title: "Flagship Smartphones & Gadgets",
-    subtitle: "iPhone 15 Pro Max & Galaxy S24 Ultra",
+    subtitle: "iPhone 16 Pro Max & Galaxy S24 Ultra",
     desc: "Starting at ₹2,499/mo No Cost EMI + Instant ₹10,000 Bank Cashback & 1-Year Free Screen Replacement.",
     image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900&q=80",
     categorySlug: "mobiles",
@@ -136,12 +142,30 @@ const BANK_OFFERS = [
   { bank: "UPI / Paytm", offer: "Assured ₹100 Cashback", sub: "On orders above ₹999", color: "from-emerald-600 to-teal-800" },
 ];
 
+const CATEGORY_TABS = [
+  { label: "All Items", slug: "" },
+  { label: "Mobiles", slug: "mobiles" },
+  { label: "Electronics", slug: "electronics" },
+  { label: "Fashion", slug: "fashion" },
+  { label: "Footwear", slug: "footwear" },
+  { label: "Home & Kitchen", slug: "home-kitchen" },
+  { label: "Beauty", slug: "beauty" },
+  { label: "Groceries", slug: "groceries" },
+  { label: "Sports", slug: "sports-fitness" },
+];
+
 export default function StoreHomePage() {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [mobilesProducts, setMobilesProducts] = useState<ProductSummary[]>([]);
   const [electronicsProducts, setElectronicsProducts] = useState<ProductSummary[]>([]);
   const [fashionProducts, setFashionProducts] = useState<ProductSummary[]>([]);
-  const [suggestedProducts, setSuggestedProducts] = useState<ProductSummary[]>([]);
+  const [catalogProducts, setCatalogProducts] = useState<ProductSummary[]>([]);
+  const [selectedTab, setSelectedTab] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(532);
+  const [hasMore, setHasMore] = useState(true);
 
   // Auto rotate hero slides every 5 seconds
   useEffect(() => {
@@ -151,26 +175,65 @@ export default function StoreHomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch live products for Flipkart product carousels
+  // Fetch initial carousels
   useEffect(() => {
-    async function loadCatalog() {
+    async function loadCarousels() {
       try {
-        const [elecRes, fashRes, sugRes] = await Promise.all([
-          fetchProducts({ category_slug: "electronics", limit: 6 }),
-          fetchProducts({ category_slug: "fashion", limit: 6 }),
-          fetchProducts({ limit: 12, sort: "relevance" }),
+        const [mobRes, elecRes, fashRes] = await Promise.all([
+          fetchProducts({ category_slug: "mobiles", limit: 8 }),
+          fetchProducts({ category_slug: "electronics", limit: 8 }),
+          fetchProducts({ category_slug: "fashion", limit: 8 }),
         ]);
+        setMobilesProducts(mobRes.items || []);
         setElectronicsProducts(elecRes.items || []);
         setFashionProducts(fashRes.items || []);
-        setSuggestedProducts(sugRes.items || []);
       } catch (err) {
-        console.error("Failed to load home products:", err);
+        console.error("Failed to load carousels:", err);
+      }
+    }
+    loadCarousels();
+  }, []);
+
+  // Fetch tabbed catalog products
+  useEffect(() => {
+    async function loadTabbedCatalog() {
+      setLoading(true);
+      setPage(1);
+      try {
+        const params: Record<string, any> = { page: 1, limit: 20, sort: "relevance" };
+        if (selectedTab) params.category_slug = selectedTab;
+
+        const res = await fetchProducts(params);
+        setCatalogProducts(res.items || []);
+        setTotalProducts(res.total || 532);
+        setHasMore(res.page < res.total_pages);
+      } catch (err) {
+        console.error("Failed to load tabbed products:", err);
       } finally {
         setLoading(false);
       }
     }
-    loadCatalog();
-  }, []);
+    loadTabbedCatalog();
+  }, [selectedTab]);
+
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    try {
+      const params: Record<string, any> = { page: nextPage, limit: 20, sort: "relevance" };
+      if (selectedTab) params.category_slug = selectedTab;
+
+      const res = await fetchProducts(params);
+      setCatalogProducts((prev) => [...prev, ...(res.items || [])]);
+      setPage(nextPage);
+      setHasMore(nextPage < res.total_pages);
+    } catch (err) {
+      console.error("Failed to load more products:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const currentSlide = HERO_SLIDES[activeSlide];
 
@@ -208,9 +271,9 @@ export default function StoreHomePage() {
                     {currentSlide.cta} <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/spin-and-win">
-                  <Button size="lg" variant="outline" className="border-amber-300 text-amber-300 hover:bg-amber-400/10 rounded-full font-bold">
-                    🎁 Daily SuperCoins Spin
+                <Link href="/products">
+                  <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 rounded-full font-bold">
+                    Browse All 532+ Products
                   </Button>
                 </Link>
               </div>
@@ -288,47 +351,39 @@ export default function StoreHomePage() {
           {/* Horizontal Product Scroller */}
           <div className="flex-1 overflow-x-auto no-scrollbar py-1">
             <div className="flex items-stretch gap-3 min-w-max">
-              {loading
-                ? Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="w-48 p-3 rounded-2xl border space-y-3">
-                      <Skeleton className="aspect-square w-full rounded-xl" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </div>
-                  ))
-                : electronicsProducts.map((p) => (
-                    <Link
-                      key={p.id}
-                      href={`/products/${p.slug}`}
-                      className="group w-48 p-3 rounded-2xl border bg-card hover:border-primary/50 hover:shadow-md transition-all flex flex-col justify-between text-center space-y-2"
-                    >
-                      <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
-                        <Image
-                          src={p.thumbnail_url || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80"}
-                          alt={p.name}
-                          fill
-                          sizes="180px"
-                          className="object-cover group-hover:scale-105 transition-transform"
-                        />
-                        {p.discount_pct > 0 && (
-                          <Badge variant="deal" className="absolute top-2 left-2 text-[10px]">
-                            {p.discount_pct}% OFF
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="space-y-0.5">
-                        <h4 className="font-semibold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">
-                          {p.name}
-                        </h4>
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block">
-                          ₹{(p.price_paise / 100).toLocaleString("en-IN")}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground line-through">
-                          ₹{(p.compare_at_price_paise / 100).toLocaleString("en-IN")}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
+              {electronicsProducts.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/products/${p.slug}`}
+                  className="group w-48 p-3 rounded-2xl border bg-card hover:border-primary/50 hover:shadow-md transition-all flex flex-col justify-between text-center space-y-2"
+                >
+                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
+                    <Image
+                      src={p.thumbnail_url || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80"}
+                      alt={p.name}
+                      fill
+                      sizes="180px"
+                      className="object-cover group-hover:scale-105 transition-transform"
+                    />
+                    {p.discount_pct > 0 && (
+                      <Badge variant="deal" className="absolute top-2 left-2 text-[10px]">
+                        {p.discount_pct}% OFF
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="font-semibold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                      {p.name}
+                    </h4>
+                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block">
+                      ₹{(p.price_paise / 100).toLocaleString("en-IN")}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground line-through">
+                      ₹{(p.compare_at_price_paise / 100).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
@@ -420,67 +475,87 @@ export default function StoreHomePage() {
           {/* Horizontal Product Scroller */}
           <div className="flex-1 overflow-x-auto no-scrollbar py-1">
             <div className="flex items-stretch gap-3 min-w-max">
-              {loading
-                ? Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="w-48 p-3 rounded-2xl border space-y-3">
-                      <Skeleton className="aspect-square w-full rounded-xl" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </div>
-                  ))
-                : fashionProducts.map((p) => (
-                    <Link
-                      key={p.id}
-                      href={`/products/${p.slug}`}
-                      className="group w-48 p-3 rounded-2xl border bg-card hover:border-primary/50 hover:shadow-md transition-all flex flex-col justify-between text-center space-y-2"
-                    >
-                      <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
-                        <Image
-                          src={p.thumbnail_url || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80"}
-                          alt={p.name}
-                          fill
-                          sizes="180px"
-                          className="object-cover group-hover:scale-105 transition-transform"
-                        />
-                        {p.discount_pct > 0 && (
-                          <Badge variant="deal" className="absolute top-2 left-2 text-[10px]">
-                            {p.discount_pct}% OFF
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="space-y-0.5">
-                        <h4 className="font-semibold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">
-                          {p.name}
-                        </h4>
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block">
-                          ₹{(p.price_paise / 100).toLocaleString("en-IN")}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground line-through">
-                          ₹{(p.compare_at_price_paise / 100).toLocaleString("en-IN")}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
+              {fashionProducts.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/products/${p.slug}`}
+                  className="group w-48 p-3 rounded-2xl border bg-card hover:border-primary/50 hover:shadow-md transition-all flex flex-col justify-between text-center space-y-2"
+                >
+                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
+                    <Image
+                      src={p.thumbnail_url || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80"}
+                      alt={p.name}
+                      fill
+                      sizes="180px"
+                      className="object-cover group-hover:scale-105 transition-transform"
+                    />
+                    {p.discount_pct > 0 && (
+                      <Badge variant="deal" className="absolute top-2 left-2 text-[10px]">
+                        {p.discount_pct}% OFF
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="font-semibold text-xs text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                      {p.name}
+                    </h4>
+                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block">
+                      ₹{(p.price_paise / 100).toLocaleString("en-IN")}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground line-through">
+                      ₹{(p.compare_at_price_paise / 100).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. SUGGESTED FOR YOU / TRENDING NOW LIVE MARKETPLACE CATALOG */}
-      <section className="container space-y-4 pt-4">
-        <div className="flex items-center justify-between pb-2 border-b">
+      {/* 6. COMPLETE 532+ PRODUCTS EXPLORER WITH CATEGORY TABS & LOAD MORE */}
+      <section className="container space-y-6 pt-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">Suggested for You</h2>
-            <p className="text-xs text-muted-foreground">Based on your activity & trending customer orders</p>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+                Explore All Products in Catalog
+              </h2>
+              <Badge className="bg-primary text-primary-foreground font-bold text-xs">
+                {totalProducts} Items Available
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Showing {catalogProducts.length} of {totalProducts} verified products with real-time stock & instant discounts
+            </p>
           </div>
+
           <Link href="/products" className="text-xs sm:text-sm font-bold text-primary hover:underline flex items-center gap-1">
-            Explore All 500+ Items <ArrowRight className="h-4 w-4" />
+            Open Advanced Search & Filters <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
+        {/* Category Pill Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          {CATEGORY_TABS.map((tab) => (
+            <button
+              key={tab.slug}
+              onClick={() => setSelectedTab(tab.slug)}
+              className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                selectedTab === tab.slug
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "bg-card border hover:bg-muted text-foreground"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Product Grid */}
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="p-3.5 rounded-2xl border bg-card space-y-3">
                 <Skeleton className="aspect-square w-full rounded-xl" />
                 <Skeleton className="h-4 w-3/4" />
@@ -491,9 +566,34 @@ export default function StoreHomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {suggestedProducts.map((p) => (
+            {catalogProducts.map((p) => (
               <ProductCard key={p.id} product={p} viewMode="grid" />
             ))}
+          </div>
+        )}
+
+        {/* Load More Button */}
+        {hasMore && (
+          <div className="flex flex-col items-center justify-center pt-6 space-y-2">
+            <Button
+              size="lg"
+              variant="outline"
+              disabled={loadingMore}
+              onClick={handleLoadMore}
+              className="rounded-2xl px-10 font-bold border-2 hover:border-primary/50 text-foreground gap-2"
+            >
+              {loadingMore ? (
+                <span>Loading more items...</span>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  <span>Load More Products (Showing {catalogProducts.length} of {totalProducts})</span>
+                </>
+              )}
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              Or visit the <Link href="/products" className="text-primary font-semibold hover:underline">All Products Catalog</Link> for faceted filtering by brand, rating, and price.
+            </p>
           </div>
         )}
       </section>
@@ -546,7 +646,7 @@ export default function StoreHomePage() {
               <RotateCcw className="h-6 w-6" />
             </div>
             <h4 className="font-bold text-xs text-foreground">7-Day Easy Replacement</h4>
-            <p className="text-[11px] text-muted-foreground">Hassle-free doorstep returns & exchanges</p>
+            <p className="text-[11px] text-muted-foreground">Doorstep pickup & exchanges</p>
           </div>
 
           <div className="flex flex-col items-center space-y-1 p-2">
